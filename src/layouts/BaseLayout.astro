@@ -33,6 +33,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
         <button id="theme-toggle" aria-label="Toggle dark mode" type="button">Dark</button>
       </div>
     </header>
+
     <main>
       <slot />
     </main>
@@ -62,26 +63,28 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
 <style>
   :root {
-    --max: 1100px;
+    --max: 1080px;
     --ease: 220ms ease;
   }
 
   html[data-theme='light'] {
     color-scheme: light;
-    --bg: #f7f7f5;
+    --bg: #f7f7f7;
     --surface: #ffffff;
-    --text: #141414;
-    --muted: #666666;
-    --line: #e4e4e1;
+    --text: #171717;
+    --muted: #626262;
+    --line: #e8e8e8;
+    --chip: #f0f0f0;
   }
 
   html[data-theme='dark'] {
     color-scheme: dark;
-    --bg: #0a0a0a;
-    --surface: #111111;
+    --bg: #0f0f0f;
+    --surface: #171717;
     --text: #f3f3f3;
-    --muted: #9b9b9b;
-    --line: #262626;
+    --muted: #9c9c9c;
+    --line: #2a2a2a;
+    --chip: #222;
   }
 
   * {
@@ -92,28 +95,21 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: Inter, 'Avenir Next', 'Helvetica Neue', sans-serif;
-    line-height: 1.45;
+    font-family: Inter, "Avenir Next", "Helvetica Neue", sans-serif;
+    line-height: 1.5;
     transition: background var(--ease), color var(--ease);
-  }
-
-  h1,
-  h2,
-  h3 {
-    font-family: 'Iowan Old Style', 'Times New Roman', serif;
-    letter-spacing: -0.015em;
   }
 
   main {
     max-width: var(--max);
     margin: 0 auto;
-    padding: 2rem 1rem 5rem;
+    padding: 2.5rem 1.25rem 5rem;
   }
 
   .site-header {
     max-width: var(--max);
     margin: 0 auto;
-    padding: 1.25rem 1rem;
+    padding: 1.1rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -123,29 +119,33 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   .brand {
     color: var(--text);
     text-decoration: none;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
   }
 
   nav {
     display: flex;
-    gap: 1rem;
+    gap: 0.3rem;
+    align-items: center;
   }
 
   nav a {
     color: var(--muted);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    padding: 0.38rem 0.62rem;
+    border-radius: 999px;
   }
 
   nav a:hover {
     color: var(--text);
+    background: var(--chip);
   }
 
   #theme-toggle {
@@ -153,9 +153,9 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     background: var(--surface);
     color: var(--text);
     border-radius: 999px;
-    padding: 0.35rem 0.7rem;
+    padding: 0.38rem 0.66rem;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     line-height: 1;
   }
 </style>

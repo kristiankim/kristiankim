@@ -30,9 +30,10 @@ const project = projects.find((p) => p.slug === slug);
 if (!project) return Astro.redirect('/works');
 ---
 <BaseLayout title={project.title}>
-  <article>
+  <article class="case">
     <h1>{project.title}</h1>
     {project.isPrivate && <p class="private">Private case study</p>}
+
     <h2>Meta data</h2>
     <ul>
       <li>Year: {project.year}</li>
@@ -41,10 +42,13 @@ if (!project) return Astro.redirect('/works');
       <li>Team members: {(project.teamMembers || []).join(', ')}</li>
       <li>Role: {project.role}</li>
     </ul>
+
     <h2>Overview</h2>
     <p>{project.overview}</p>
+
     <h2>Case study</h2>
     <p>Text + images sections are enabled in schema plan and will be connected to Sanity Portable Text blocks.</p>
+
     <h2>Outcome / impact metrics</h2>
     <ul>
       {(project.impact || []).map((item) => <li>{item}</li>)}
@@ -53,5 +57,10 @@ if (!project) return Astro.redirect('/works');
 </BaseLayout>
 
 <style>
-article{max-width:820px}.private{color:var(--muted)}h1{font-size:clamp(2rem,4vw,3rem)}h2{margin-top:2rem}
+  .case { max-width: 820px; }
+  h1 { margin: 0 0 0.8rem; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -0.02em; }
+  h2 { margin: 2rem 0 .8rem; font-size: 1.05rem; letter-spacing: -0.01em; }
+  p, li { color: var(--muted); }
+  ul { margin: 0; padding-left: 1.1rem; }
+  .private { display: inline-block; color: var(--muted); border: 1px solid var(--line); padding: .2rem .5rem; border-radius: 999px; font-size: .82rem; }
 </style>

@@ -15,18 +15,26 @@ const thoughts = sanityPosts.length
   : fallbackThoughts;
 ---
 <BaseLayout title="Thoughts">
-  <h1>Thoughts</h1>
-  {!isSanityConfigured && <p class="notice">Using local fallback content. Connect Sanity env vars to load CMS content.</p>}
-  <ul class="list">
-    {thoughts.map((post) => (
-      <li>
-        <a href={`/thoughts/${post.slug}`}>{post.title}</a>
-        <span>{post.publishedAt}</span>
-      </li>
-    ))}
-  </ul>
+  <section class="page">
+    <h1>Thoughts</h1>
+    {!isSanityConfigured && <p class="notice">Using local fallback content. Connect Sanity env vars to load CMS content.</p>}
+    <ul class="list">
+      {thoughts.map((post) => (
+        <li>
+          <a href={`/thoughts/${post.slug}`}>{post.title}</a>
+          <span>{post.publishedAt}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
 </BaseLayout>
 
 <style>
-.notice{color:var(--muted);font-size:.9rem}.list{list-style:none;padding:0;display:grid;gap:1rem}li{display:flex;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);padding:.75rem 0}span{color:var(--muted);font-size:.9rem}a{color:var(--text);text-decoration:none}
+  .page { max-width: 900px; }
+  h1 { margin: 0 0 1.5rem; font-size: clamp(1.7rem, 3.6vw, 2.6rem); letter-spacing: -0.02em; }
+  .notice { color: var(--muted); font-size: .9rem; margin-bottom: 1rem; }
+  .list { list-style: none; padding: 0; margin: 0; display: grid; }
+  li { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); padding: 0.95rem 0; }
+  span { color: var(--muted); font-size: .88rem; }
+  a { color: var(--text); text-decoration: none; font-weight: 500; letter-spacing: -0.01em; }
 </style>

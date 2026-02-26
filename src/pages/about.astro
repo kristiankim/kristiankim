@@ -1,9 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
+
 <BaseLayout title="About">
-  <h1>About</h1>
-  <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
-  <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
-  <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
+  <section class="about">
+    <h1>About</h1>
+    <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
+    <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
+    <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
+  </section>
 </BaseLayout>
+
+<style>
+  .about { max-width: 760px; }
+  h1 { margin: 0 0 1.2rem; font-size: clamp(1.8rem, 4.2vw, 3rem); letter-spacing: -0.02em; }
+  p { margin: 0 0 1rem; color: var(--muted); }
+  a { color: var(--text); text-underline-offset: 3px; }
+</style>
