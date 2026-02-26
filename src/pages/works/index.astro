@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { projects } from '../../data/content';
+---
+<BaseLayout title="Works">
+  <h1>Works</h1>
+  <ul class="list">
+    {projects.map((p) => (
+      <li>
+        <a href={`/works/${p.slug}`}>{p.title}</a>
+        {p.isPrivate && <span class="badge">Private</span>}
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+.list{list-style:none;padding:0;display:grid;gap:1rem}li{border-bottom:1px solid var(--line);padding:.75rem 0}a{color:var(--text);text-decoration:none}.badge{margin-left:.75rem;font-size:.75rem;border:1px solid var(--line);padding:.15rem .45rem;border-radius:999px;color:var(--muted)}
+</style>
