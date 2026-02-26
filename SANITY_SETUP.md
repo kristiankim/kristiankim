@@ -1,17 +1,26 @@
 # Sanity Setup (KristianKim Portfolio)
 
-## 1) Install Sanity Studio (inside this repo)
+Sanity Studio is now scaffolded in `/studio` and wired to project `m63s8wwp` dataset `production`.
+
+## Run Studio
 
 ```bash
-npm create sanity@latest -- --project m63s8wwp --dataset production --typescript --template clean --output-path studio
+npm run studio
 ```
 
-## 2) Replace studio schema
+## Build Studio
 
-- Copy `sanity/schemas/*` into `studio/schemaTypes/`
-- In `studio/schemaTypes/index.ts`, export `schemaTypes` from `sanity/schemas/index.ts`
+```bash
+npm run studio:build
+```
 
-## 3) Astro env vars
+## Deploy Studio
+
+```bash
+npm run studio:deploy
+```
+
+## Astro env vars
 
 Create `.env` in repo root:
 
@@ -21,16 +30,21 @@ PUBLIC_SANITY_DATASET=production
 PUBLIC_SANITY_API_VERSION=2026-02-26
 ```
 
-## 4) Vercel env vars
+## Vercel env vars
 
 Set same three vars in Vercel project settings.
 
-## 5) Content model includes
+## Content model includes
 
 - `project`
 - `post`
 - `author`
-- Portable Text blocks: quote, callout, metrics, gallery, full-width image (image block)
+- Portable Text blocks:
+  - image (full-width supported in front-end renderer pass)
+  - quote block
+  - callout block
+  - metrics block
+  - gallery block
 
 ## Notes
 

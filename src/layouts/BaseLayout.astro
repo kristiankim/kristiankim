@@ -1,20 +1,161 @@
 ---
-interface Props { title?: string; description?: string; }
-const { title = 'Kristian Kim', description = 'Product designer crafting intuitive and user-centered experiences.' } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Kristian Kim',
+  description = 'Product designer crafting intuitive and user-centered experiences.',
+} = Astro.props;
+
 const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`;
 ---
+
 <!doctype html>
-<html lang="en" class="dark">
-<head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width" />
-<meta name="description" content={description} /><meta name="generator" content={Astro.generator} />
-<title>{fullTitle}</title>
-</head>
-<body>
-<header class="site-header"><a class="brand" href="/">Kristian Kim</a><nav><a href="/works">Works</a><a href="/thoughts">Thoughts</a><a href="/about">About</a></nav></header>
-<main><slot /></main>
-</body>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Kristian Kim</a>
+      <div class="header-actions">
+        <nav>
+          <a href="/works">Works</a>
+          <a href="/thoughts">Thoughts</a>
+          <a href="/about">About</a>
+        </nav>
+        <button id="theme-toggle" aria-label="Toggle dark mode" type="button">Dark</button>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+
+    <script is:inline>
+      const key = 'kristiankim-theme';
+      const root = document.documentElement;
+      const button = document.getElementById('theme-toggle');
+
+      const applyTheme = (theme) => {
+        root.setAttribute('data-theme', theme);
+        if (button) button.textContent = theme === 'dark' ? 'Light' : 'Dark';
+      };
+
+      const stored = localStorage.getItem(key);
+      applyTheme(stored === 'dark' ? 'dark' : 'light');
+
+      button?.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(key, next);
+        applyTheme(next);
+      });
+    </script>
+  </body>
 </html>
+
 <style>
-:root{color-scheme:dark;--bg:#0a0a0a;--text:#f3f3f3;--muted:#9b9b9b;--line:#262626;--max:1100px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Avenir Next","Helvetica Neue",sans-serif;line-height:1.45}main{max-width:var(--max);margin:0 auto;padding:2rem 1rem 5rem}.site-header{max-width:var(--max);margin:0 auto;padding:1.25rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.brand{color:var(--text);text-decoration:none;font-weight:600;letter-spacing:.01em}nav{display:flex;gap:1rem}nav a{color:var(--muted);text-decoration:none;font-size:.95rem}nav a:hover{color:var(--text)}
+  :root {
+    --max: 1100px;
+    --ease: 220ms ease;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #141414;
+    --muted: #666666;
+    --line: #e4e4e1;
+  }
+
+  html[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --text: #f3f3f3;
+    --muted: #9b9b9b;
+    --line: #262626;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, 'Avenir Next', 'Helvetica Neue', sans-serif;
+    line-height: 1.45;
+    transition: background var(--ease), color var(--ease);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Iowan Old Style', 'Times New Roman', serif;
+    letter-spacing: -0.015em;
+  }
+
+  main {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+  }
+
+  .site-header {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 1rem;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  nav a:hover {
+    color: var(--text);
+  }
+
+  #theme-toggle {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
 </style>

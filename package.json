@@ -6,7 +6,10 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "studio": "sanity dev --cwd studio",
+    "studio:build": "sanity build --cwd studio",
+    "studio:deploy": "sanity deploy --cwd studio"
   },
   "dependencies": {
     "@sanity/client": "^7.16.0",
@@ -15,6 +18,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@sanity/vision": "^5.12.0",
+    "sanity": "^5.12.0",
     "typescript": "^5.9.3"
   }
 }
