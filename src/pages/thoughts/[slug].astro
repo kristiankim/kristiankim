@@ -1,9 +1,28 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { thoughts } from '../../data/content';
+import { thoughts as fallbackThoughts } from '../../data/content';
+import { getPosts } from '../../lib/sanity';
 
-export function getStaticPaths() {
-  return thoughts.map((post) => ({ params: { slug: post.slug } }));
+const sanityPosts = await getPosts();
+const thoughts = sanityPosts.length
+  ? sanityPosts.map((p) => ({
+      slug: p.slug.current,
+      title: p.title,
+      category: p.category || 'Thoughts',
+      publishedAt: (p.publishedAt || '').slice(0, 10),
+      sections: p.body?.length ? ['This post is stored in Sanity. Portable Text rendering will be connected in the next step.'] : [],
+    }))
+  : fallbackThoughts;
+
+export async function getStaticPaths() {
+  const { getPosts } = await import('../../lib/sanity');
+  const { thoughts: fallbackThoughts } = await import('../../data/content');
+  const sanityPosts = await getPosts();
+  const items = sanityPosts.length
+    ? sanityPosts.map((p) => ({ slug: p.slug.current }))
+    : fallbackThoughts.map((p) => ({ slug: p.slug }));
+
+  return items.map((post) => ({ params: { slug: post.slug } }));
 }
 
 const { slug } = Astro.params;

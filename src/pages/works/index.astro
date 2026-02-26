@@ -1,9 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { projects } from '../../data/content';
+import { projects as fallbackProjects } from '../../data/content';
+import { getProjects, isSanityConfigured } from '../../lib/sanity';
+
+const sanityProjects = await getProjects();
+const projects = sanityProjects.length
+  ? sanityProjects.map((p) => ({
+      ...p,
+      slug: p.slug.current,
+      teamMembers: p.teamMembers ?? [],
+      impact: p.impact ?? [],
+      isPrivate: Boolean(p.isPrivate),
+    }))
+  : fallbackProjects;
 ---
 <BaseLayout title="Works">
   <h1>Works</h1>
+  {!isSanityConfigured && <p class="notice">Using local fallback content. Connect Sanity env vars to load CMS content.</p>}
   <ul class="list">
     {projects.map((p) => (
       <li>
@@ -15,5 +28,5 @@ import { projects } from '../../data/content';
 </BaseLayout>
 
 <style>
-.list{list-style:none;padding:0;display:grid;gap:1rem}li{border-bottom:1px solid var(--line);padding:.75rem 0}a{color:var(--text);text-decoration:none}.badge{margin-left:.75rem;font-size:.75rem;border:1px solid var(--line);padding:.15rem .45rem;border-radius:999px;color:var(--muted)}
+.notice{color:var(--muted);font-size:.9rem}.list{list-style:none;padding:0;display:grid;gap:1rem}li{border-bottom:1px solid var(--line);padding:.75rem 0}a{color:var(--text);text-decoration:none}.badge{margin-left:.75rem;font-size:.75rem;border:1px solid var(--line);padding:.15rem .45rem;border-radius:999px;color:var(--muted)}
 </style>

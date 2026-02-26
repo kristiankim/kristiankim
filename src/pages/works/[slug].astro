@@ -1,9 +1,28 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { projects } from '../../data/content';
+import { projects as fallbackProjects } from '../../data/content';
+import { getProjects } from '../../lib/sanity';
 
-export function getStaticPaths() {
-  return projects.map((project) => ({ params: { slug: project.slug } }));
+const sanityProjects = await getProjects();
+const projects = sanityProjects.length
+  ? sanityProjects.map((p) => ({
+      ...p,
+      slug: p.slug.current,
+      teamMembers: p.teamMembers ?? [],
+      impact: p.impact ?? [],
+      isPrivate: Boolean(p.isPrivate),
+    }))
+  : fallbackProjects;
+
+export async function getStaticPaths() {
+  const { getProjects } = await import('../../lib/sanity');
+  const { projects: fallbackProjects } = await import('../../data/content');
+  const sanityProjects = await getProjects();
+  const items = sanityProjects.length
+    ? sanityProjects.map((p) => ({ slug: p.slug.current }))
+    : fallbackProjects.map((p) => ({ slug: p.slug }));
+
+  return items.map((project) => ({ params: { slug: project.slug } }));
 }
 
 const { slug } = Astro.params;
@@ -19,7 +38,7 @@ if (!project) return Astro.redirect('/works');
       <li>Year: {project.year}</li>
       <li>Company: {project.company}</li>
       <li>Website: {project.website || 'N/A'}</li>
-      <li>Team members: {project.teamMembers.join(', ')}</li>
+      <li>Team members: {(project.teamMembers || []).join(', ')}</li>
       <li>Role: {project.role}</li>
     </ul>
     <h2>Overview</h2>
@@ -28,7 +47,7 @@ if (!project) return Astro.redirect('/works');
     <p>Text + images sections are enabled in schema plan and will be connected to Sanity Portable Text blocks.</p>
     <h2>Outcome / impact metrics</h2>
     <ul>
-      {project.impact.map((item) => <li>{item}</li>)}
+      {(project.impact || []).map((item) => <li>{item}</li>)}
     </ul>
   </article>
 </BaseLayout>
