@@ -1,5 +1,5 @@
 import { createClient } from '@sanity/client';
-import imageUrlBuilder from '@sanity/image-url';
+import { createImageUrlBuilder } from '@sanity/image-url';
 import groq from 'groq';
 
 const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
@@ -9,10 +9,10 @@ const apiVersion = import.meta.env.PUBLIC_SANITY_API_VERSION || '2026-02-26';
 export const isSanityConfigured = Boolean(projectId && dataset);
 
 export const sanity = isSanityConfigured
-  ? createClient({ projectId, dataset, apiVersion, useCdn: true })
+  ? createClient({ projectId, dataset, apiVersion, useCdn: false })
   : null;
 
-const builder = sanity ? imageUrlBuilder(sanity) : null;
+const builder = sanity ? createImageUrlBuilder(sanity) : null;
 
 export const urlFor = (source: unknown) => {
   if (!builder || !source) return null;
