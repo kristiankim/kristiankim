@@ -4,16 +4,40 @@ import { projects as fallbackProjects } from '../../data/content';
 import { getProjects, urlFor } from '../../lib/sanity';
 
 const sanityProjects = await getProjects();
+type PortableChild = { _type?: string; text?: string };
+type PortableBlock = {
+  _type?: string;
+  _key?: string;
+  style?: string;
+  children?: PortableChild[];
+  asset?: unknown;
+  alt?: string;
+  quote?: string;
+  cite?: string;
+  title?: string;
+  text?: string;
+  items?: Array<{ label?: string; value?: string }>;
+  images?: Array<Record<string, any>>;
+};
+
+const toText = (block: PortableBlock) =>
+  (block.children || [])
+    .filter((child) => child?._type === 'span')
+    .map((child) => child.text || '')
+    .join('')
+    .trim();
+
 const projects = sanityProjects.length
   ? sanityProjects.map((p) => ({
       ...p,
       slug: p.slug.current,
       coverImageUrl: p.cover?.asset ? urlFor(p.cover)?.width(1800).quality(85).url() : null,
       teamMembers: p.teamMembers ?? [],
+      bodyBlocks: (p.body || []) as PortableBlock[],
       impact: p.impact ?? [],
       isPrivate: Boolean(p.isPrivate),
     }))
-  : fallbackProjects.map((p) => ({ ...p, coverImageUrl: null }));
+  : fallbackProjects.map((p) => ({ ...p, coverImageUrl: null, bodyBlocks: [] }));
 
 export async function getStaticPaths() {
   const { getProjects } = await import('../../lib/sanity');
@@ -52,7 +76,69 @@ if (!project) return Astro.redirect('/works');
     <p>{project.overview}</p>
 
     <h2>Case study</h2>
-    <p>Text + images sections are enabled in schema plan and will be connected to Sanity Portable Text blocks.</p>
+    {project.bodyBlocks.length ? (
+      <div class="case-body">
+        {project.bodyBlocks.map((block, idx) => {
+          if (block._type === 'block') {
+            const text = toText(block);
+            if (!text) return null;
+            if (block.style === 'h2') return <h3>{text}</h3>;
+            return <p>{text}</p>;
+          }
+
+          if (block._type === 'image' && block.asset) {
+            const imageUrl = urlFor(block)?.width(1600).quality(85).url();
+            return imageUrl ? <img class="content-image" src={imageUrl} alt={block.alt || `Case image ${idx + 1}`} loading="lazy" /> : null;
+          }
+
+          if (block._type === 'quoteBlock') {
+            return (
+              <blockquote class="quote-block">
+                <p>“{block.quote || ''}”</p>
+                {block.cite && <cite>— {block.cite}</cite>}
+              </blockquote>
+            );
+          }
+
+          if (block._type === 'calloutBlock') {
+            return (
+              <section class="callout-block">
+                {block.title && <h4>{block.title}</h4>}
+                <p>{block.text || ''}</p>
+              </section>
+            );
+          }
+
+          if (block._type === 'metricsBlock' && Array.isArray(block.items)) {
+            return (
+              <section class="metrics-grid">
+                {block.items.map((item) => (
+                  <article>
+                    <strong>{item.value || '-'}</strong>
+                    <span>{item.label || ''}</span>
+                  </article>
+                ))}
+              </section>
+            );
+          }
+
+          if (block._type === 'galleryBlock' && Array.isArray(block.images)) {
+            return (
+              <section class="gallery-grid">
+                {block.images.map((image, imageIdx) => {
+                  const imageUrl = urlFor(image)?.width(1200).quality(82).url();
+                  return imageUrl ? <img src={imageUrl} alt={image.alt || `Gallery image ${imageIdx + 1}`} loading="lazy" /> : null;
+                })}
+              </section>
+            );
+          }
+
+          return null;
+        })}
+      </div>
+    ) : (
+      <p>No case study blocks yet.</p>
+    )}
 
     <h2>Outcome / impact metrics</h2>
     <ul>
@@ -75,4 +161,32 @@ if (!project) return Astro.redirect('/works');
   p, li { color: var(--muted); }
   ul { margin: 0; padding-left: 1.1rem; }
   .private { display: inline-block; color: var(--muted); border: 1px solid var(--line); padding: .2rem .5rem; border-radius: 999px; font-size: .82rem; }
+  .case-body { display: grid; gap: 1rem; }
+  .case-body h3 { margin: 0.4rem 0 0; font-size: 1.4rem; letter-spacing: -0.02em; }
+  .content-image { width: 100%; border-radius: 0.35rem; }
+  .quote-block {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-left: 3px solid var(--line);
+    background: var(--surface);
+  }
+  .quote-block p { margin: 0; color: var(--text); }
+  .quote-block cite { display: block; margin-top: 0.5rem; font-size: 0.9rem; color: var(--muted); font-style: normal; }
+  .callout-block {
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+  }
+  .callout-block h4 { margin: 0 0 0.3rem; font-size: 0.96rem; }
+  .callout-block p { margin: 0; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
+  .metrics-grid article { border: 1px solid var(--line); border-radius: 0.45rem; padding: 0.75rem; background: var(--surface); }
+  .metrics-grid strong { display: block; font-size: 1.1rem; letter-spacing: -0.02em; color: var(--text); }
+  .metrics-grid span { color: var(--muted); font-size: 0.85rem; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+  .gallery-grid img { width: 100%; border-radius: 0.35rem; aspect-ratio: 16/10; object-fit: cover; }
+  @media (max-width: 900px) {
+    .metrics-grid, .gallery-grid { grid-template-columns: 1fr; }
+  }
 </style>

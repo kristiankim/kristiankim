@@ -7,7 +7,13 @@ export const project = defineType({
   fields: [
     defineField({ name: 'title', title: 'Title', type: 'string', validation: (r) => r.required() }),
     defineField({ name: 'slug', title: 'Slug', type: 'slug', options: { source: 'title', maxLength: 96 }, validation: (r) => r.required() }),
-    defineField({ name: 'cover', title: 'Cover', type: 'image', options: { hotspot: true } }),
+    defineField({
+      name: 'cover',
+      title: 'Cover',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [{ name: 'alt', title: 'Alt text', type: 'string' }],
+    }),
     defineField({ name: 'year', title: 'Year', type: 'string' }),
     defineField({ name: 'company', title: 'Company', type: 'string' }),
     defineField({ name: 'website', title: 'Website', type: 'url' }),

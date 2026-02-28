@@ -139,6 +139,48 @@ const headings = post.bodyBlocks
             return imageUrl ? <img class="content-image" src={imageUrl} alt={block.alt || `Image ${idx + 1}`} loading="lazy" /> : null;
           }
 
+          if (block._type === 'quoteBlock') {
+            return (
+              <blockquote class="quote-block">
+                <p>“{block.quote || ''}”</p>
+                {block.cite && <cite>— {block.cite}</cite>}
+              </blockquote>
+            );
+          }
+
+          if (block._type === 'calloutBlock') {
+            return (
+              <section class="callout-block">
+                {block.title && <h4>{block.title}</h4>}
+                <p>{block.text || ''}</p>
+              </section>
+            );
+          }
+
+          if (block._type === 'metricsBlock' && Array.isArray(block.items)) {
+            return (
+              <section class="metrics-grid">
+                {block.items.map((item) => (
+                  <article>
+                    <strong>{item.value || '-'}</strong>
+                    <span>{item.label || ''}</span>
+                  </article>
+                ))}
+              </section>
+            );
+          }
+
+          if (block._type === 'galleryBlock' && Array.isArray(block.images)) {
+            return (
+              <section class="gallery-grid">
+                {block.images.map((image, imageIdx) => {
+                  const imageUrl = urlFor(image)?.width(1100).quality(82).url();
+                  return imageUrl ? <img src={imageUrl} alt={image.alt || `Gallery image ${imageIdx + 1}`} loading="lazy" /> : null;
+                })}
+              </section>
+            );
+          }
+
           return null;
         })}
       </div>
@@ -163,11 +205,48 @@ const headings = post.bodyBlocks
   .body h3 { font-size: 1.35rem; }
   .body p { margin: 0; color: var(--muted); line-height: 1.75; font-size: 1rem; }
   .content-image { width: 100%; border-radius: 0.35rem; margin: 0.6rem 0; }
+  .quote-block {
+    margin: 1rem 0;
+    padding: 1rem 1.1rem;
+    border-left: 3px solid var(--line);
+    background: var(--surface);
+  }
+  .quote-block p { margin: 0; font-size: 1.03rem; color: var(--text); }
+  .quote-block cite { display: block; margin-top: 0.6rem; color: var(--muted); font-style: normal; font-size: 0.9rem; }
+  .callout-block {
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+  }
+  .callout-block h4 { margin: 0 0 0.3rem; font-size: 0.96rem; }
+  .callout-block p { margin: 0; }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+  .metrics-grid article {
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+    padding: 0.75rem;
+    background: var(--surface);
+  }
+  .metrics-grid strong { display: block; font-size: 1.1rem; letter-spacing: -0.02em; }
+  .metrics-grid span { color: var(--muted); font-size: 0.85rem; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+  .gallery-grid img { width: 100%; border-radius: 0.35rem; aspect-ratio: 16/10; object-fit: cover; }
   @media (max-width: 920px) {
     .hero { grid-template-columns: 1fr; }
     .hero-copy h1 { max-width: none; }
     .content-grid { grid-template-columns: 1fr; gap: 1rem; }
     .toc { position: static; padding-bottom: 0.8rem; border-bottom: 1px solid var(--line); }
     .meta-row { grid-template-columns: 1fr; gap: 0.3rem; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: 1fr; }
   }
 </style>

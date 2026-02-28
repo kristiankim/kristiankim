@@ -27,6 +27,7 @@ export type SanityProject = {
     asset?: { _ref: string; _type: string };
     alt?: string;
   };
+  body?: Array<Record<string, any>>;
   year?: string;
   company?: string;
   website?: string;
@@ -55,7 +56,7 @@ export async function getProjects(): Promise<SanityProject[]> {
   if (!sanity) return [];
   return sanity.fetch(
     groq`*[_type == "project"] | order(coalesce(year, "") desc, _createdAt desc){
-      _id,title,slug,cover{asset,alt},year,company,website,teamMembers,role,overview,isPrivate,impact
+      _id,title,slug,cover{asset,alt},year,company,website,teamMembers,role,overview,body,isPrivate,impact
     }`
   );
 }
