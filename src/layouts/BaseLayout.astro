@@ -19,6 +19,9 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>{fullTitle}</title>
   </head>
   <body>
@@ -66,8 +69,8 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   :root {
     --max: 1080px;
     --ease: 220ms ease;
-    --font-sans: "Inter", "SF Pro Text", "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+    --font-sans: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-serif: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   html[data-theme='light'] {
@@ -108,7 +111,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   }
 
   h1, h2, h3 {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-weight: 600;
     line-height: 1.08;
     letter-spacing: -0.018em;
@@ -133,7 +136,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   .brand {
     color: var(--text);
     text-decoration: none;
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-weight: 600;
     letter-spacing: -0.012em;
   }
