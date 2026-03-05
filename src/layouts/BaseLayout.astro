@@ -25,16 +25,18 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <title>{fullTitle}</title>
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="/">Kristian Kim</a>
-      <div class="header-actions">
-        <nav>
-          <a href="/works">Works</a>
-          <a href="/thoughts">Thoughts</a>
-          <a href="/about">About</a>
-          <a href="/tokens">Tokens</a>
-        </nav>
-        <button id="theme-toggle" aria-label="Toggle dark mode" type="button">Dark</button>
+    <header id="topnav" class="topnav">
+      <div class="topnav-inner">
+        <a class="brand" href="/">Kristian Kim</a>
+        <div class="header-actions">
+          <nav>
+            <a href="/works">Works</a>
+            <a href="/thoughts">Thoughts</a>
+            <a href="/about">About</a>
+            <a href="/tokens">Tokens</a>
+          </nav>
+          <button id="theme-toggle" aria-label="Toggle dark mode" type="button">Dark</button>
+        </div>
       </div>
     </header>
 
@@ -46,6 +48,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
       const key = 'kristiankim-theme';
       const root = document.documentElement;
       const button = document.getElementById('theme-toggle');
+      const nav = document.getElementById('topnav');
 
       const applyTheme = (theme) => {
         root.setAttribute('data-theme', theme);
@@ -61,6 +64,22 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
         localStorage.setItem(key, next);
         applyTheme(next);
       });
+
+      let lastY = window.scrollY;
+      window.addEventListener('scroll', () => {
+        if (!nav) return;
+        const y = window.scrollY;
+        nav.classList.toggle('scrolled', y > 16);
+
+        if (y > lastY && y > 120) {
+          nav.classList.add('scroll-down');
+          nav.classList.remove('scroll-up');
+        } else {
+          nav.classList.remove('scroll-down');
+          nav.classList.add('scroll-up');
+        }
+        lastY = y;
+      }, { passive: true });
     </script>
   </body>
 </html>
@@ -81,6 +100,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     --muted: #626262;
     --line: #e8e8e8;
     --chip: #f0f0f0;
+    --nav-bg: color-mix(in oklab, white 80%, transparent);
   }
 
   html[data-theme='dark'] {
@@ -91,11 +111,10 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     --muted: #9c9c9c;
     --line: #2a2a2a;
     --chip: #222;
+    --nav-bg: color-mix(in oklab, #171717 76%, transparent);
   }
 
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   body {
     margin: 0;
@@ -117,20 +136,36 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     letter-spacing: -0.018em;
   }
 
-  main {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 2.5rem 1.25rem 5rem;
+  .topnav {
+    position: sticky;
+    top: 1rem;
+    z-index: 50;
+    transition: transform .35s cubic-bezier(.617,1.5,.68,1), opacity .35s ease;
   }
 
-  .site-header {
-    max-width: var(--max);
+  .topnav.scroll-down {
+    transform: translateY(-135%);
+    opacity: 0;
+  }
+
+  .topnav.scroll-up,
+  .topnav:not(.scroll-down) {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .topnav-inner {
+    max-width: min(var(--max), 960px);
     margin: 0 auto;
-    padding: 1.1rem 1.25rem;
+    padding: .66rem .9rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 
   .brand {
@@ -139,26 +174,29 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     font-family: var(--font-sans);
     font-weight: 600;
     letter-spacing: -0.012em;
+    font-size: .95rem;
+    white-space: nowrap;
   }
 
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.5rem;
   }
 
   nav {
     display: flex;
-    gap: 0.3rem;
+    gap: 0.2rem;
     align-items: center;
   }
 
   nav a {
     color: var(--muted);
     text-decoration: none;
-    font-size: 0.92rem;
-    padding: 0.38rem 0.62rem;
+    font-size: 0.9rem;
+    padding: 0.34rem 0.58rem;
     border-radius: 999px;
+    transition: color var(--ease), background var(--ease);
   }
 
   nav a:hover {
@@ -168,12 +206,31 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
   #theme-toggle {
     border: 1px solid var(--line);
-    background: var(--surface);
+    background: transparent;
     color: var(--text);
     border-radius: 999px;
-    padding: 0.38rem 0.66rem;
+    padding: 0.34rem 0.58rem;
     cursor: pointer;
     font-size: 0.78rem;
     line-height: 1;
+  }
+
+  main {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 2.1rem 1.25rem 5rem;
+  }
+
+  @media (max-width: 860px) {
+    .topnav { top: .65rem; }
+    .topnav-inner {
+      border-radius: 1rem;
+      max-width: calc(100% - 1rem);
+      align-items: flex-start;
+      gap: .6rem;
+      flex-direction: column;
+    }
+    .header-actions { width: 100%; justify-content: space-between; }
+    nav { overflow-x: auto; padding-bottom: 2px; }
   }
 </style>
