@@ -154,7 +154,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
 <style>
   :root {
-    --max: 1080px;
+    --max: min(1680px, calc(100vw - 2.4rem));
     --ease: 220ms ease;
     --font-sans: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
     --font-serif: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -223,7 +223,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   }
 
   .topnav-inner {
-    max-width: min(var(--max), 960px);
+    max-width: min(var(--max), 1280px);
     margin: 0 auto;
     padding: .66rem .9rem;
     display: flex;
