@@ -110,7 +110,23 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
       ];
 
       const revealNodes = document.querySelectorAll(revealSelectors.join(','));
-      revealNodes.forEach((node) => node.classList.add('reveal-item'));
+
+      revealNodes.forEach((node, idx) => {
+        node.classList.add('reveal-item');
+
+        const isHero = node.matches('.hero img');
+        const isCard = node.matches('.cards article, .writing-list li, .list li, .metrics-grid article');
+        const isTextBlock = node.matches('main section, .quote-block, .callout-block');
+
+        const baseDelay = isHero ? 120 : isCard ? 90 : isTextBlock ? 40 : 20;
+        const stagger = isCard ? (idx % 6) * 55 : (idx % 4) * 35;
+        const duration = isHero ? 900 : isTextBlock ? 760 : 680;
+        const distance = isHero ? 28 : isTextBlock ? 20 : 14;
+
+        node.style.setProperty('--reveal-delay', `${baseDelay + stagger}ms`);
+        node.style.setProperty('--reveal-duration', `${duration}ms`);
+        node.style.setProperty('--reveal-distance', `${distance}px`);
+      });
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -119,7 +135,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
             observer.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+      }, { threshold: 0.13, rootMargin: '0px 0px -10% 0px' });
 
       revealNodes.forEach((node) => observer.observe(node));
     </script>
@@ -264,9 +280,14 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   }
 
   .reveal-item {
+    --reveal-delay: 0ms;
+    --reveal-duration: 680ms;
+    --reveal-distance: 16px;
     opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 600ms cubic-bezier(.22,.61,.36,1), transform 700ms cubic-bezier(.22,.61,.36,1);
+    transform: translateY(var(--reveal-distance));
+    transition:
+      opacity var(--reveal-duration) cubic-bezier(.22,.61,.36,1) var(--reveal-delay),
+      transform calc(var(--reveal-duration) + 80ms) cubic-bezier(.22,.61,.36,1) var(--reveal-delay);
     will-change: opacity, transform;
   }
 
