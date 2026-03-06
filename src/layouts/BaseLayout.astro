@@ -28,15 +28,13 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <header id="topnav" class="topnav">
       <div class="topnav-inner">
         <a class="brand" href="/">Kristian Kim</a>
-        <div class="header-actions">
-          <nav>
-            <a href="/works">Works</a>
-            <a href="/thoughts">Thoughts</a>
-            <a href="/about">About</a>
-            <a href="/tokens">Tokens</a>
-          </nav>
-          <button id="theme-toggle" aria-label="Toggle dark mode" type="button">Dark</button>
-        </div>
+        <nav>
+          <a href="/works">Works</a>
+          <a href="/thoughts">Thoughts</a>
+          <a href="/about">About</a>
+          <a href="/tokens">Tokens</a>
+        </nav>
+        <div aria-hidden="true"></div>
       </div>
     </header>
 
@@ -47,25 +45,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <script type="module">
       import Lenis from 'lenis';
 
-      const key = 'kristiankim-theme';
-      const root = document.documentElement;
-      const button = document.getElementById('theme-toggle');
       const nav = document.getElementById('topnav');
-
-      const applyTheme = (theme) => {
-        root.setAttribute('data-theme', theme);
-        if (button) button.textContent = theme === 'dark' ? 'Light' : 'Dark';
-      };
-
-      const stored = localStorage.getItem(key);
-      applyTheme(stored === 'dark' ? 'dark' : 'light');
-
-      button?.addEventListener('click', () => {
-        const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        localStorage.setItem(key, next);
-        applyTheme(next);
-      });
 
       const lenis = new Lenis({
         duration: 1.12,
@@ -80,41 +60,33 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
       }
       requestAnimationFrame(raf);
 
-      let lastY = window.scrollY;
       window.addEventListener('scroll', () => {
         if (!nav) return;
         const y = window.scrollY;
         nav.classList.toggle('scrolled', y > 16);
 
-        const blur = Math.min(24, 12 + y * 0.035);
+        const blur = Math.min(16, 4 + y * 0.02);
         nav.style.setProperty('--nav-blur', `${blur.toFixed(2)}px`);
 
         if (heroMedia) {
-          const drift = Math.min(26, y * 0.075);
-          heroMedia.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0) scale(1.02)`;
+          const drift = Math.min(18, y * 0.05);
+          heroMedia.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0) scale(1.01)`;
         }
-
-        if (y > lastY && y > 120) {
-          nav.classList.add('scroll-down');
-          nav.classList.remove('scroll-up');
-        } else {
-          nav.classList.remove('scroll-down');
-          nav.classList.add('scroll-up');
-        }
-        lastY = y;
       }, { passive: true });
 
       const revealSelectors = [
-        'main section',
+        '.hero-copy',
+        '.hero-portrait',
+        '.section-label',
         '.cards article',
         '.writing-list li',
         '.list li',
-        '.hero img',
         '.content-image',
         '.gallery-grid img',
         '.quote-block',
         '.callout-block',
-        '.metrics-grid article'
+        '.metrics-grid article',
+        '.about-more p'
       ];
 
       const heroMedia = document.querySelector('.hero img');
@@ -124,14 +96,15 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
       revealNodes.forEach((node, idx) => {
         node.classList.add('reveal-item');
 
-        const isHero = node.matches('.hero img');
+        const isHeroText = node.matches('.hero-copy');
+        const isHeroImage = node.matches('.hero-portrait');
         const isCard = node.matches('.cards article, .writing-list li, .list li, .metrics-grid article');
-        const isTextBlock = node.matches('main section, .quote-block, .callout-block');
+        const isTextBlock = node.matches('.section-label, .quote-block, .callout-block, .about-more p');
 
-        const baseDelay = isHero ? 120 : isCard ? 90 : isTextBlock ? 40 : 20;
+        const baseDelay = isHeroText ? 0 : isHeroImage ? 200 : isCard ? 90 : isTextBlock ? 40 : 20;
         const stagger = isCard ? (idx % 6) * 55 : (idx % 4) * 35;
-        const duration = isHero ? 900 : isTextBlock ? 760 : 680;
-        const distance = isHero ? 28 : isTextBlock ? 20 : 14;
+        const duration = isHeroImage ? 820 : isHeroText ? 760 : isTextBlock ? 740 : 660;
+        const distance = isHeroImage ? 26 : isHeroText ? 18 : isTextBlock ? 18 : 14;
 
         node.style.setProperty('--reveal-delay', `${baseDelay + stagger}ms`);
         node.style.setProperty('--reveal-duration', `${duration}ms`);
@@ -206,34 +179,21 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
   .topnav {
     position: sticky;
-    top: 1rem;
+    top: 0;
     z-index: 50;
-    transition: transform .35s cubic-bezier(.617,1.5,.68,1), opacity .35s ease;
-  }
-
-  .topnav.scroll-down {
-    transform: translateY(-135%);
-    opacity: 0;
-  }
-
-  .topnav.scroll-up,
-  .topnav:not(.scroll-down) {
-    transform: translateY(0);
-    opacity: 1;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: blur(var(--nav-blur, 6px));
+    -webkit-backdrop-filter: blur(var(--nav-blur, 6px));
   }
 
   .topnav-inner {
-    max-width: min(var(--max), 1280px);
+    max-width: var(--max);
     margin: 0 auto;
-    padding: .66rem .9rem;
-    display: flex;
-    justify-content: space-between;
+    padding: .8rem 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--nav-bg);
-    backdrop-filter: blur(var(--nav-blur, 18px));
-    -webkit-backdrop-filter: blur(var(--nav-blur, 18px));
   }
 
   .brand {
@@ -246,41 +206,23 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     white-space: nowrap;
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
   nav {
     display: flex;
-    gap: 0.2rem;
+    gap: .9rem;
     align-items: center;
+    justify-self: start;
   }
 
   nav a {
     color: var(--muted);
     text-decoration: none;
-    font-size: 0.9rem;
-    padding: 0.34rem 0.58rem;
-    border-radius: 999px;
-    transition: color var(--ease), background var(--ease);
+    font-size: 0.86rem;
+    padding: 0;
+    transition: color var(--ease);
   }
 
   nav a:hover {
     color: var(--text);
-    background: var(--chip);
-  }
-
-  #theme-toggle {
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--text);
-    border-radius: 999px;
-    padding: 0.34rem 0.58rem;
-    cursor: pointer;
-    font-size: 0.78rem;
-    line-height: 1;
   }
 
   main {
@@ -315,15 +257,15 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   }
 
   @media (max-width: 860px) {
-    .topnav { top: .65rem; }
     .topnav-inner {
-      border-radius: 1rem;
-      max-width: calc(100% - 1rem);
-      align-items: flex-start;
-      gap: .6rem;
-      flex-direction: column;
+      grid-template-columns: 1fr;
+      gap: .35rem;
+      padding: .75rem 1rem;
     }
-    .header-actions { width: 100%; justify-content: space-between; }
-    nav { overflow-x: auto; padding-bottom: 2px; }
+    nav {
+      overflow-x: auto;
+      padding-bottom: 2px;
+      gap: .75rem;
+    }
   }
 </style>

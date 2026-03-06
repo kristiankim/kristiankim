@@ -19,38 +19,44 @@ const writing = (sanityPosts.length
 ---
 
 <BaseLayout>
-  <section class="hero">
-    <div>
-      <h1>{home.intro}</h1>
+  <section class="hero tri-grid">
+    <div class="section-label">Home</div>
+    <div class="hero-copy">
+      <h3>{home.intro}</h3>
       <p class="lead">{home.body}</p>
     </div>
     <img
-      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1000&q=80"
+      class="hero-portrait"
+      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80"
       alt="Portrait"
       loading="lazy"
     />
   </section>
 
-  <section class="section split">
-    <h2>Projects</h2>
+  <section class="section tri-grid">
+    <div class="section-label">Projects</div>
     <p>Coming soon</p>
+    <div></div>
   </section>
 
-  <section class="section split">
-    <h2>Playground</h2>
+  <section class="section tri-grid">
+    <div class="section-label">Playground</div>
     <div class="cards">
       {playground.map((item) => (
         <article>
+          <div>
+            <h3>{item.title}</h3>
+            <p>{item.caption}</p>
+          </div>
           <img src={item.thumb} alt={item.title} loading="lazy" />
-          <h3>{item.title}</h3>
-          <p>{item.caption}</p>
         </article>
       ))}
     </div>
+    <div></div>
   </section>
 
-  <section class="section split">
-    <h2>Writings</h2>
+  <section class="section tri-grid">
+    <div class="section-label">Writings</div>
     <ul class="writing-list">
       {writing.map((post, idx) => (
         <li class={idx === writing.length - 1 ? 'last' : ''}>
@@ -59,35 +65,92 @@ const writing = (sanityPosts.length
         </li>
       ))}
     </ul>
+    <div></div>
   </section>
 
-  <section class="section split about-more">
-    <h2>More</h2>
+  <section class="section tri-grid about-more">
+    <div class="section-label">More</div>
     <p>{home.longBio}</p>
+    <div></div>
   </section>
 </BaseLayout>
 
 <style>
-  .hero {
-    padding-top: 1.2rem;
+  .tri-grid {
     display: grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap: 1.5rem;
-    align-items: end;
+    grid-template-columns: minmax(120px, 16%) minmax(0, 54%) minmax(260px, 30%);
+    gap: 1.4rem;
+    align-items: start;
   }
-  .hero img { width: 100%; border-radius: .2rem; aspect-ratio: 4 / 3; object-fit: cover; transform: translate3d(0,0,0) scale(1.02); transition: transform 220ms linear; will-change: transform; }
-  h1 { margin: 0 0 1rem; font-size: clamp(1.68rem, 3.8vw, 3rem); line-height: 1.1; letter-spacing: -.02em; font-weight: 600; }
-  .lead { margin: 0; max-width: 72ch; color: var(--muted); font-size: 1rem; line-height: 1.72; }
 
-  .section { border-top: 1px solid var(--line); margin-top: 2.2rem; padding-top: 1.1rem; }
-  .split { display: grid; grid-template-columns: 160px 1fr; gap: 1.4rem; }
-  .split h2 { margin: .15rem 0 0; font-family: Inter, sans-serif; font-size: .9rem; font-weight: 600; letter-spacing: -.01em; }
+  .hero {
+    min-height: 68vh;
+    align-items: center;
+  }
 
-  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-  .cards article { border: 1px solid var(--line); border-radius: .3rem; padding: .45rem; background: var(--surface); }
-  .cards img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: .2rem; }
-  .cards h3 { margin: .5rem 0 .2rem; font-family: Inter, sans-serif; font-size: .95rem; }
-  .cards p { margin: 0; color: var(--muted); font-size: .86rem; }
+  .section {
+    border-top: 1px solid var(--line);
+    padding-top: 1.15rem;
+    margin-top: 2.2rem;
+  }
+
+  .section-label {
+    font-size: .84rem;
+    color: var(--muted);
+    letter-spacing: -.005em;
+    padding-top: .2rem;
+  }
+
+  .hero-copy h3 {
+    margin: 0 0 .8rem;
+    font-size: clamp(1.15rem, 1.8vw, 1.6rem);
+    line-height: 1.3;
+    font-weight: 600;
+    max-width: 40ch;
+  }
+
+  .lead {
+    margin: 0;
+    max-width: 66ch;
+    color: var(--muted);
+    font-size: .96rem;
+    line-height: 1.72;
+  }
+
+  .hero-portrait {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: .15rem;
+    transform: translate3d(0,0,0) scale(1.01);
+    transition: transform 220ms linear;
+    will-change: transform;
+  }
+
+  .cards {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .cards article {
+    border-top: 1px solid var(--line);
+    padding-top: .9rem;
+    display: grid;
+    grid-template-columns: 1fr minmax(180px, 42%);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .cards h3 { margin: 0 0 .3rem; font-size: 1rem; }
+  .cards p { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.64; }
+  .cards img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: .15rem;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .cards img:hover { transform: scale(1.02); box-shadow: 0 10px 28px rgba(0,0,0,.08); }
 
   .writing-list { list-style: none; margin: 0; padding: 0; display: grid; }
   .writing-list li { display: grid; grid-template-columns: 120px 1fr; gap: 1rem; padding: .65rem 0; border-bottom: 1px solid var(--line); }
@@ -95,12 +158,12 @@ const writing = (sanityPosts.length
   .writing-list span { color: var(--muted); font-size: .83rem; }
   .writing-list a { color: var(--text); text-decoration: none; font-size: .95rem; }
 
-  .about-more p { margin: 0; color: var(--muted); line-height: 1.8; max-width: 74ch; }
+  .about-more p { margin: 0; color: var(--muted); line-height: 1.8; max-width: 72ch; }
 
-  @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; }
-    .split { grid-template-columns: 1fr; }
-    .cards { grid-template-columns: 1fr; }
-    .writing-list li { grid-template-columns: 1fr; gap: .3rem; }
+  @media (max-width: 980px) {
+    .tri-grid { grid-template-columns: 1fr; gap: .8rem; }
+    .hero { min-height: auto; }
+    .cards article { grid-template-columns: 1fr; }
+    .writing-list li { grid-template-columns: 1fr; gap: .25rem; }
   }
 </style>
