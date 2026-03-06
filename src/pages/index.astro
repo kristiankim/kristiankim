@@ -75,7 +75,7 @@ const writing = (sanityPosts.length
     gap: 1.5rem;
     align-items: end;
   }
-  .hero img { width: 100%; border-radius: .2rem; aspect-ratio: 4 / 3; object-fit: cover; }
+  .hero img { width: 100%; border-radius: .2rem; aspect-ratio: 4 / 3; object-fit: cover; transform: translate3d(0,0,0) scale(1.02); transition: transform 220ms linear; will-change: transform; }
   h1 { margin: 0 0 1rem; font-size: clamp(1.68rem, 3.8vw, 3rem); line-height: 1.1; letter-spacing: -.02em; font-weight: 600; }
   .lead { margin: 0; max-width: 72ch; color: var(--muted); font-size: 1rem; line-height: 1.72; }
 
