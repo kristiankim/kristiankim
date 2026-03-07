@@ -78,10 +78,18 @@ const writing = (sanityPosts.length
 <style>
   .tri-grid {
     display: grid;
-    grid-template-columns: minmax(120px, 16%) minmax(0, 54%) minmax(260px, 30%);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 1.4rem;
     align-items: start;
   }
+
+  .tri-grid > .section-label { grid-column: span 4; }
+  .tri-grid > .hero-copy,
+  .tri-grid > .cards,
+  .tri-grid > .writing-list,
+  .tri-grid > p { grid-column: span 4; }
+  .tri-grid > .hero-portrait,
+  .tri-grid > div:last-child { grid-column: span 4; }
 
   .hero {
     min-height: 68vh;

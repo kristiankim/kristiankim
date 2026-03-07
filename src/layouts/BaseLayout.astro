@@ -21,7 +21,9 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600,700&display=swap" />
     <title>{fullTitle}</title>
   </head>
   <body>
@@ -206,8 +208,8 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
   :root {
     --max: min(1680px, calc(100vw - 2.4rem));
     --ease: 220ms ease;
-    --font-sans: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --font-serif: "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-sans: "Geist", "Inter", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-serif: "Gambetta", Georgia, "Times New Roman", serif;
   }
 
   html[data-theme='light'] {
@@ -253,11 +255,18 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     overflow-x: hidden;
   }
 
-  h1, h2, h3 {
+  h1, h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.016em;
+  }
+
+  h3 {
     font-family: var(--font-sans);
     font-weight: 600;
-    line-height: 1.08;
-    letter-spacing: -0.018em;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
   }
 
   .orb-bg {
@@ -321,21 +330,24 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     margin: 0 auto;
     padding: .8rem 1.25rem;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1rem;
     align-items: center;
   }
 
   .brand {
+    grid-column: span 4;
     color: var(--text);
     text-decoration: none;
     font-family: var(--font-sans);
-    font-weight: 600;
-    letter-spacing: -0.012em;
-    font-size: .95rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-size: .92rem;
     white-space: nowrap;
   }
 
   nav {
+    grid-column: span 4;
     display: flex;
     gap: .9rem;
     align-items: center;
@@ -352,6 +364,10 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
   nav a:hover {
     color: var(--text);
+  }
+
+  .topnav-inner > div[aria-hidden='true'] {
+    grid-column: span 4;
   }
 
   main {
