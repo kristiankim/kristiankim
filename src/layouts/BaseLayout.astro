@@ -25,6 +25,12 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     <title>{fullTitle}</title>
   </head>
   <body>
+    <div class="orb-bg" aria-hidden="true">
+      <div class="orb-gradient"></div>
+      <div class="orb-grid"></div>
+      <div id="background-orb" class="orb"></div>
+    </div>
+
     <header id="topnav" class="topnav">
       <div class="topnav-inner">
         <a class="brand" href="/">Kristian Kim</a>
@@ -46,6 +52,7 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
       import Lenis from 'lenis';
 
       const nav = document.getElementById('topnav');
+      const orb = document.getElementById('background-orb');
 
       const lenis = new Lenis({
         duration: 1.12,
@@ -54,11 +61,81 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
         touchMultiplier: 1.2,
       });
 
+      const ORB_SIZE = 800;
+      let isIdle = false;
+      let idleTimer;
+      let driftTimer;
+
+      const centerX = window.innerWidth / 2 - ORB_SIZE / 2;
+      const centerY = window.innerHeight / 2 - ORB_SIZE / 2;
+
+      let currentX = centerX;
+      let currentY = centerY;
+      let targetX = centerX;
+      let targetY = centerY;
+      let vx = 0;
+      let vy = 0;
+      let stiffness = 0.08;
+      let damping = 0.82;
+
+      const animateOrb = () => {
+        const dx = targetX - currentX;
+        const dy = targetY - currentY;
+
+        vx = (vx + dx * stiffness) * damping;
+        vy = (vy + dy * stiffness) * damping;
+
+        currentX += vx;
+        currentY += vy;
+
+        if (orb) {
+          orb.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
+        }
+      };
+
       function raf(time) {
         lenis.raf(time);
+        animateOrb();
         requestAnimationFrame(raf);
       }
       requestAnimationFrame(raf);
+
+      const setActiveTracking = () => {
+        isIdle = false;
+        stiffness = 0.1;
+        damping = 0.8;
+      };
+
+      const startIdleMode = () => {
+        isIdle = true;
+        stiffness = 0.02;
+        damping = 0.93;
+
+        clearInterval(driftTimer);
+        driftTimer = setInterval(() => {
+          const nextX = targetX + (Math.random() * 400 - 200);
+          const nextY = targetY + (Math.random() * 400 - 200);
+          const boundedX = Math.max(-ORB_SIZE / 2, Math.min(window.innerWidth - ORB_SIZE / 2, nextX));
+          const boundedY = Math.max(-ORB_SIZE / 2, Math.min(window.innerHeight - ORB_SIZE / 2, nextY));
+          targetX = boundedX;
+          targetY = boundedY;
+        }, 4000);
+      };
+
+      const resetIdleTimer = () => {
+        clearTimeout(idleTimer);
+        clearInterval(driftTimer);
+        idleTimer = setTimeout(startIdleMode, 1000);
+      };
+
+      window.addEventListener('mousemove', (e) => {
+        setActiveTracking();
+        targetX = e.clientX - ORB_SIZE / 2;
+        targetY = e.clientY - ORB_SIZE / 2;
+        resetIdleTimer();
+      }, { passive: true });
+
+      resetIdleTimer();
 
       window.addEventListener('scroll', () => {
         if (!nav) return;
@@ -157,6 +234,10 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
 
   * { box-sizing: border-box; }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -168,6 +249,8 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     transition: background var(--ease), color var(--ease);
+    position: relative;
+    overflow-x: hidden;
   }
 
   h1, h2, h3 {
@@ -175,6 +258,46 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     font-weight: 600;
     line-height: 1.08;
     letter-spacing: -0.018em;
+  }
+
+  .orb-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+    background: #faf9f6;
+  }
+
+  .orb-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #fdfbf7 0%, #faf9f6 52%, #faf9f6 100%);
+  }
+
+  .orb-grid {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 33%;
+    opacity: .06;
+    background-image:
+      linear-gradient(to right, #d2b48c 1px, transparent 1px),
+      linear-gradient(to bottom, #d2b48c 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to right, black, transparent);
+  }
+
+  .orb {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 999px;
+    opacity: .58;
+    mix-blend-mode: multiply;
+    filter: blur(80px);
+    background: radial-gradient(circle at center, rgba(210,180,140,.56) 0%, rgba(222,184,135,.36) 50%, transparent 70%);
+    transform: translate3d(-400px, -400px, 0);
+    will-change: transform;
   }
 
   .topnav {
@@ -185,6 +308,12 @@ const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`
     background: color-mix(in oklab, var(--bg) 88%, transparent);
     backdrop-filter: blur(var(--nav-blur, 6px));
     -webkit-backdrop-filter: blur(var(--nav-blur, 6px));
+  }
+
+  .topnav,
+  main {
+    position: relative;
+    z-index: 10;
   }
 
   .topnav-inner {
