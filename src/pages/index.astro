@@ -1,7 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { home, playground, projects as fallbackProjects, thoughts as fallbackThoughts } from '../data/content';
-import { getPosts, getProjects } from '../lib/sanity';
+import {
+  experiences,
+  home,
+  playground,
+  projects as fallbackProjects,
+  thoughts as fallbackThoughts,
+} from '../data/content';
+import { getPosts, getProjects, urlFor } from '../lib/sanity';
 
 const sanityPosts = await getPosts();
 const sanityProjects = await getProjects();
@@ -29,6 +35,8 @@ const works = sanityProjects.length
       company: project.company || 'Independent',
       overview: project.overview || 'Details coming soon.',
       isPrivate: Boolean(project.isPrivate),
+      coverImageUrl: project.cover?.asset ? urlFor(project.cover)?.width(1600).quality(85).url() : null,
+      coverImageAlt: project.cover?.alt || project.title,
     }))
   : fallbackProjects.map((project) => ({
       slug: project.slug,
@@ -37,6 +45,8 @@ const works = sanityProjects.length
       company: project.company || 'Independent',
       overview: project.overview || 'Details coming soon.',
       isPrivate: Boolean(project.isPrivate),
+      coverImageUrl: null,
+      coverImageAlt: project.title,
     }));
 ---
 
@@ -60,19 +70,17 @@ const works = sanityProjects.length
 
   <section class="section-block">
     <div class="section-header">
-      <div class="section-heading">Works</div>
+      <div class="section-heading">Experiences</div>
     </div>
     <div class="works-list">
-      {works.map((project) => (
+      {experiences.map((item) => (
         <article class="project-row">
-          <div class="project-company">{project.company}</div>
+          <div class="project-company">{item.company}</div>
           <div class="project-year">
-            <span>{project.year}</span>
-            {project.isPrivate && <span>Private</span>}
+            <span>{item.period}</span>
           </div>
           <div class="project-copy">
-            <a href={`/works/${project.slug}`}>{project.title}</a>
-            <p>{project.overview}</p>
+            <p class="project-summary">{item.summary}</p>
           </div>
         </article>
       ))}
@@ -81,16 +89,27 @@ const works = sanityProjects.length
 
   <section class="section-block">
     <div class="section-header">
-      <div class="section-heading">Playground</div>
+      <div class="section-heading">Selected work</div>
     </div>
-    <div class="playground-list">
-      {playground.map((item) => (
-        <article class="playground-card">
-          <div class="playground-copy">
-            <h2>{item.title}</h2>
-            <p>{item.caption}</p>
+    <div class="selected-work-list">
+      {works.map((project) => (
+        <article class="selected-work-card">
+          <div class="selected-work-copy">
+            <div class="selected-work-meta">
+              <span>{project.company}</span>
+              <span>{project.year}</span>
+              {project.isPrivate && <span>Private</span>}
+            </div>
+            <div class="selected-work-text">
+              <a class="selected-work-link" href={`/works/${project.slug}`}>{project.title}</a>
+              <p>{project.overview}</p>
+            </div>
           </div>
-          <img src={item.thumb} alt={item.title} loading="lazy" />
+          {project.coverImageUrl ? (
+            <img class="selected-work-image" src={project.coverImageUrl} alt={project.coverImageAlt} loading="lazy" />
+          ) : (
+            <div class="selected-work-placeholder" aria-hidden="true"></div>
+          )}
         </article>
       ))}
     </div>
@@ -113,12 +132,18 @@ const works = sanityProjects.length
 
   <section class="section-block">
     <div class="section-header">
-      <div class="section-heading">More</div>
+      <div class="section-heading">Playground</div>
     </div>
-    <div class="twelve-col">
-      <div class="more-copy detail-copy">
-        <p>{home.longBio}</p>
-      </div>
+    <div class="playground-grid">
+      {playground.map((item) => (
+        <article class="playground-tile">
+          <img src={item.thumb} alt={item.title} loading="lazy" />
+          <div class="playground-tile-copy">
+            <h2>{item.title}</h2>
+            <p>{item.caption}</p>
+          </div>
+        </article>
+      ))}
     </div>
   </section>
 </BaseLayout>
@@ -165,7 +190,7 @@ const works = sanityProjects.length
 
   .works-list,
   .writing-list,
-  .playground-list {
+  .selected-work-list {
     display: grid;
   }
 
@@ -203,6 +228,10 @@ const works = sanityProjects.length
     gap: 6px;
   }
 
+  .project-summary {
+    color: var(--text);
+  }
+
   .project-copy a,
   .writing-link {
     color: var(--text);
@@ -217,11 +246,11 @@ const works = sanityProjects.length
     text-underline-offset: 3px;
   }
 
-  .playground-list {
+  .selected-work-list {
     gap: 24px;
   }
 
-  .playground-card {
+  .selected-work-card {
     display: grid;
     grid-template-columns: 544px minmax(0, 1fr);
     gap: 24px;
@@ -230,32 +259,85 @@ const works = sanityProjects.length
     align-items: start;
   }
 
-  .playground-card:last-child {
+  .selected-work-card:last-child {
     border-bottom: 0;
     padding-bottom: 0;
   }
 
-  .playground-copy {
+  .selected-work-copy {
     display: grid;
-    gap: 8px;
+    gap: 16px;
     max-width: 544px;
   }
 
-  .playground-copy h2 {
-    font-size: 24px;
-    line-height: 1.1667;
+  .selected-work-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.2857;
   }
 
-  .playground-card img {
+  .selected-work-text {
+    display: grid;
+    gap: 4px;
+  }
+
+  .selected-work-link {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 24px;
+    line-height: 1.1667;
+    font-family: var(--font-serif);
+  }
+
+  .selected-work-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .selected-work-image,
+  .selected-work-placeholder {
     width: 100%;
-    min-height: 320px;
+    min-height: 420px;
     aspect-ratio: 1112 / 696;
     object-fit: cover;
   }
 
-  .more-copy {
-    grid-column: 1 / span 4;
-    max-width: 402px;
+  .selected-work-placeholder {
+    background:
+      linear-gradient(135deg, rgba(23, 23, 23, 0.05), rgba(23, 23, 23, 0.12)),
+      rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--line);
+  }
+
+  .playground-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .playground-tile {
+    display: grid;
+    gap: 24px;
+    align-content: start;
+  }
+
+  .playground-tile-copy {
+    display: grid;
+    gap: 8px;
+  }
+
+  .playground-tile-copy h2 {
+    font-size: 24px;
+    line-height: 1.1667;
+  }
+
+  .playground-tile img {
+    width: 100%;
+    aspect-ratio: 544 / 360;
+    object-fit: cover;
   }
 
   @media (max-width: 980px) {
@@ -265,8 +347,7 @@ const works = sanityProjects.length
 
     .hero-intro,
     .hero-body,
-    .hero-visual,
-    .more-copy {
+    .hero-visual {
       grid-column: auto;
       max-width: none;
     }
@@ -279,13 +360,18 @@ const works = sanityProjects.length
 
     .project-row,
     .writing-row,
-    .playground-card {
+    .selected-work-card {
       grid-template-columns: 1fr;
       gap: 12px;
     }
 
-    .playground-card img {
+    .selected-work-image,
+    .selected-work-placeholder {
       min-height: 0;
+    }
+
+    .playground-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

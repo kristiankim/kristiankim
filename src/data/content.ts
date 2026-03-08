@@ -5,27 +5,51 @@ export const home = {
     "While drawing rectangles and adding text is my primary job, I’m also driven by curiosity and constantly find myself diving into new topics—from AI and photography to video making—always exploring ways to expand my perspective and creativity. Outside of work, I’m a husband, a father of three amazing (and wild) kids, and when I finally get a moment to myself, you’ll either find me playing console games or winding down with a good book on my eReader.",
 };
 
+export const experiences = [
+  {
+    company: 'JPMorgan Chase',
+    period: 'October 2020 → Present',
+    summary:
+      'As a lead designer, I collaborate closely with cross-functional teams to drive key initiatives across new and existing products. Currently leading design for a new financial platform serving businesses of all sizes, with a focus on scalable systems, accessibility, and user-centered design.',
+  },
+  {
+    company: 'Hugo and Cat',
+    period: 'February 2020 → September 2020',
+    summary:
+      'Worked as a UI Designer on digital projects for clients such as Amazon, Schneider, Pfizer, and the American College of Surgeons. Contributed to both mobile applications and marketing websites, delivering polished, brand-aligned user interfaces across diverse industries.',
+  },
+  {
+    company: 'Mosaicapp',
+    period: 'September 2015 → November 2019',
+    summary:
+      'Led the end-to-end design of a 0→1 product supporting project and resource management for businesses. Oversaw both mobile and desktop experiences, partnering with engineering and product teams throughout the full development cycle.',
+  },
+];
+
 export const playground = [
   {
-    title: 'Dashboard concept',
-    type: 'Image',
-    caption: 'A simple visual experiment for a lightweight analytics dashboard.',
-    thumb:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+    title: 'Squarex landing page',
+    caption:
+      'A playful marketing site concept designed to showcase product value with bold graphics, layered cards, and an upbeat section rhythm.',
+    thumb: '/images/playground/squarex-landing.png',
   },
   {
-    title: 'Marketing landing page',
-    type: 'Image',
-    caption: 'Fast concept around modern hero composition and section rhythm.',
-    thumb:
-      'https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=80',
+    title: 'Sparkquest Dashboard page',
+    caption:
+      'A dashboard exploration focused on information density, approachable visual hierarchy, and quick scanning for parents and operators.',
+    thumb: '/images/playground/sparkquest-dashboard.png',
   },
   {
-    title: 'Simple form flow',
-    type: 'Image',
-    caption: 'Clean form and validation UX pattern exploration.',
-    thumb:
-      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+    title: 'Sparkquest Task page',
+    caption:
+      'A task management concept designed to keep assignments and progress readable through lightweight cards and strong contrast.',
+    thumb: '/images/playground/sparkquest-task.png',
+  },
+  {
+    title: 'Squarex landing page',
+    caption:
+      'A second landing page variation exploring cleaner chart-led storytelling and a sharper editorial rhythm.',
+    thumb: '/images/playground/squarex-charts.png',
   },
 ];
 
