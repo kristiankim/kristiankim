@@ -1,177 +1,287 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { home, playground, thoughts as fallbackThoughts } from '../data/content';
-import { getPosts } from '../lib/sanity';
+import { home, playground, projects as fallbackProjects, thoughts as fallbackThoughts } from '../data/content';
+import { getPosts, getProjects } from '../lib/sanity';
 
 const sanityPosts = await getPosts();
+const sanityProjects = await getProjects();
+
 const writing = (sanityPosts.length
-  ? sanityPosts.map((p) => ({
-      slug: p.slug.current,
-      title: p.title,
-      publishedAt: (p.publishedAt || '').slice(0, 10),
+  ? sanityPosts.map((post) => ({
+      slug: post.slug.current,
+      title: post.title,
+      category: post.category || 'Thoughts',
+      publishedAt: (post.publishedAt || '').slice(0, 10),
     }))
-  : fallbackThoughts.map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      publishedAt: p.publishedAt,
+  : fallbackThoughts.map((post) => ({
+      slug: post.slug,
+      title: post.title,
+      category: post.category,
+      publishedAt: post.publishedAt,
     }))
 ).sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+
+const works = sanityProjects.length
+  ? sanityProjects.map((project) => ({
+      slug: project.slug.current,
+      title: project.title,
+      year: project.year || 'In progress',
+      company: project.company || 'Independent',
+      overview: project.overview || 'Details coming soon.',
+      isPrivate: Boolean(project.isPrivate),
+    }))
+  : fallbackProjects.map((project) => ({
+      slug: project.slug,
+      title: project.title,
+      year: project.year || 'In progress',
+      company: project.company || 'Independent',
+      overview: project.overview || 'Details coming soon.',
+      isPrivate: Boolean(project.isPrivate),
+    }));
 ---
 
 <BaseLayout>
-  <section class="hero tri-grid">
-    <div class="section-label">Home</div>
-    <div class="hero-copy">
-      <h3>{home.intro}</h3>
-      <p class="lead">{home.body}</p>
+  <section class="home-hero twelve-col">
+    <div class="hero-intro">
+      <h1>{home.intro}</h1>
     </div>
-    <img
-      class="hero-portrait"
-      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80"
-      alt="Portrait"
-      loading="lazy"
-    />
+    <div class="hero-body detail-copy">
+      <p>{home.body}</p>
+      <p>{home.longBio}</p>
+    </div>
+    <div class="hero-visual">
+      <img
+        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80"
+        alt="Portrait"
+        loading="lazy"
+      />
+    </div>
   </section>
 
-  <section class="section tri-grid">
-    <div class="section-label">Projects</div>
-    <p>Coming soon</p>
-    <div></div>
+  <section class="section-block">
+    <div class="section-header">
+      <div class="section-heading">Works</div>
+    </div>
+    <div class="works-list">
+      {works.map((project) => (
+        <article class="project-row">
+          <div class="project-company">{project.company}</div>
+          <div class="project-year">
+            <span>{project.year}</span>
+            {project.isPrivate && <span>Private</span>}
+          </div>
+          <div class="project-copy">
+            <a href={`/works/${project.slug}`}>{project.title}</a>
+            <p>{project.overview}</p>
+          </div>
+        </article>
+      ))}
+    </div>
   </section>
 
-  <section class="section tri-grid">
-    <div class="section-label">Playground</div>
-    <div class="cards">
+  <section class="section-block">
+    <div class="section-header">
+      <div class="section-heading">Playground</div>
+    </div>
+    <div class="playground-list">
       {playground.map((item) => (
-        <article>
-          <div>
-            <h3>{item.title}</h3>
+        <article class="playground-card">
+          <div class="playground-copy">
+            <h2>{item.title}</h2>
             <p>{item.caption}</p>
           </div>
           <img src={item.thumb} alt={item.title} loading="lazy" />
         </article>
       ))}
     </div>
-    <div></div>
   </section>
 
-  <section class="section tri-grid">
-    <div class="section-label">Writings</div>
-    <ul class="writing-list">
-      {writing.map((post, idx) => (
-        <li class={idx === writing.length - 1 ? 'last' : ''}>
-          <span>{post.publishedAt}</span>
-          <a href={`/thoughts/${post.slug}`}>{post.title}</a>
-        </li>
+  <section class="section-block">
+    <div class="section-header">
+      <div class="section-heading">Writings</div>
+    </div>
+    <div class="writing-list">
+      {writing.map((post) => (
+        <article class="writing-row">
+          <div class="writing-date">{post.publishedAt}</div>
+          <div class="writing-category">{post.category}</div>
+          <a class="writing-link" href={`/thoughts/${post.slug}`}>{post.title}</a>
+        </article>
       ))}
-    </ul>
-    <div></div>
+    </div>
   </section>
 
-  <section class="section tri-grid about-more">
-    <div class="section-label">More</div>
-    <p>{home.longBio}</p>
-    <div></div>
+  <section class="section-block">
+    <div class="section-header">
+      <div class="section-heading">More</div>
+    </div>
+    <div class="twelve-col">
+      <div class="more-copy detail-copy">
+        <p>{home.longBio}</p>
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
-  .tri-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 1.4rem;
+  .home-hero {
+    min-height: min(816px, calc(100vh - 130px));
     align-items: start;
   }
 
-  .tri-grid > .section-label { grid-column: span 4; }
-  .tri-grid > .hero-copy,
-  .tri-grid > .cards,
-  .tri-grid > .writing-list,
-  .tri-grid > p { grid-column: span 4; }
-  .tri-grid > .hero-portrait,
-  .tri-grid > div:last-child { grid-column: span 4; }
-
-  .hero {
-    min-height: 68vh;
-    align-items: center;
+  .hero-intro,
+  .hero-body,
+  .hero-visual {
+    align-self: start;
   }
 
-  .section {
-    border-top: 1px solid var(--line);
-    padding-top: 1.15rem;
-    margin-top: 2.2rem;
+  .hero-intro {
+    grid-column: span 4;
+    max-width: 402px;
   }
 
-  .section-label {
-    font-size: .84rem;
-    color: var(--muted);
-    letter-spacing: -.005em;
-    padding-top: .2rem;
+  .hero-intro h1 {
+    font-size: clamp(2rem, 2.3vw, 2.6rem);
+    line-height: 1.25;
   }
 
-  .hero-copy h3 {
-    margin: 0 0 .8rem;
-    font-size: clamp(1.15rem, 1.8vw, 1.6rem);
-    line-height: 1.3;
-    font-weight: 600;
-    max-width: 40ch;
+  .hero-body {
+    grid-column: span 4;
+    max-width: 402px;
   }
 
-  .lead {
-    margin: 0;
-    max-width: 66ch;
-    color: var(--muted);
-    font-size: .96rem;
-    line-height: 1.72;
+  .hero-visual {
+    grid-column: span 4;
   }
 
-  .hero-portrait {
-    width: 100%;
-    aspect-ratio: 1 / 1;
+  .hero-visual img {
+    width: min(402px, 100%);
+    aspect-ratio: 402 / 528;
     object-fit: cover;
-    border-radius: .15rem;
-    transform: translate3d(0,0,0) scale(1.01);
-    transition: transform 220ms linear;
-    will-change: transform;
   }
 
-  .cards {
+  .works-list,
+  .writing-list,
+  .playground-list {
     display: grid;
-    gap: 1rem;
   }
 
-  .cards article {
-    border-top: 1px solid var(--line);
-    padding-top: .9rem;
+  .project-row,
+  .writing-row {
     display: grid;
-    grid-template-columns: 1fr minmax(180px, 42%);
-    gap: 1rem;
+    grid-template-columns: 260px 260px minmax(0, 1fr);
+    gap: 24px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
     align-items: start;
   }
 
-  .cards h3 { margin: 0 0 .3rem; font-size: 1rem; }
-  .cards p { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.64; }
-  .cards img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: .15rem;
-    transition: transform .35s ease, box-shadow .35s ease;
+  .project-row:last-child,
+  .writing-row:last-child {
+    border-bottom: 0;
   }
-  .cards img:hover { transform: scale(1.02); box-shadow: 0 10px 28px rgba(0,0,0,.08); }
 
-  .writing-list { list-style: none; margin: 0; padding: 0; display: grid; }
-  .writing-list li { display: grid; grid-template-columns: 120px 1fr; gap: 1rem; padding: .65rem 0; border-bottom: 1px solid var(--line); }
-  .writing-list li.last { border-bottom: 0; }
-  .writing-list span { color: var(--muted); font-size: .83rem; }
-  .writing-list a { color: var(--text); text-decoration: none; font-size: .95rem; }
+  .project-company,
+  .project-year,
+  .writing-date,
+  .writing-category {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.2857;
+  }
 
-  .about-more p { margin: 0; color: var(--muted); line-height: 1.8; max-width: 72ch; }
+  .project-year {
+    display: grid;
+    gap: 2px;
+  }
+
+  .project-copy {
+    display: grid;
+    gap: 6px;
+  }
+
+  .project-copy a,
+  .writing-link {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.375;
+  }
+
+  .project-copy a:hover,
+  .writing-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .playground-list {
+    gap: 24px;
+  }
+
+  .playground-card {
+    display: grid;
+    grid-template-columns: 544px minmax(0, 1fr);
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line-strong);
+    align-items: start;
+  }
+
+  .playground-card:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .playground-copy {
+    display: grid;
+    gap: 8px;
+    max-width: 544px;
+  }
+
+  .playground-copy h2 {
+    font-size: 24px;
+    line-height: 1.1667;
+  }
+
+  .playground-card img {
+    width: 100%;
+    min-height: 320px;
+    aspect-ratio: 1112 / 696;
+    object-fit: cover;
+  }
+
+  .more-copy {
+    grid-column: 1 / span 4;
+    max-width: 402px;
+  }
 
   @media (max-width: 980px) {
-    .tri-grid { grid-template-columns: 1fr; gap: .8rem; }
-    .hero { min-height: auto; }
-    .cards article { grid-template-columns: 1fr; }
-    .writing-list li { grid-template-columns: 1fr; gap: .25rem; }
+    .home-hero {
+      min-height: auto;
+    }
+
+    .hero-intro,
+    .hero-body,
+    .hero-visual,
+    .more-copy {
+      grid-column: auto;
+      max-width: none;
+    }
+
+    .hero-visual img {
+      width: 100%;
+      max-width: 402px;
+    }
+
+    .project-row,
+    .writing-row,
+    .playground-card {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .playground-card img {
+      min-height: 0;
+    }
   }
 </style>

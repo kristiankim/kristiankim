@@ -3,17 +3,54 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="About">
-  <section class="about">
-    <h1>About</h1>
-    <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
-    <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
-    <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
+  <section class="about-page twelve-col">
+    <div class="about-title">
+      <h1>About</h1>
+    </div>
+    <div class="about-copy detail-copy">
+      <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
+      <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
+      <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
-  .about { max-width: 760px; }
-  h1 { margin: 0 0 1.2rem; font-size: clamp(1.7rem, 3.6vw, 2.5rem); letter-spacing: -0.018em; line-height: 1.12; }
-  p { margin: 0 0 1rem; color: var(--muted); line-height: 1.72; }
-  a { color: var(--text); text-underline-offset: 3px; }
+  .about-page {
+    min-height: 420px;
+    align-items: start;
+  }
+
+  .about-title {
+    grid-column: span 4;
+    max-width: 402px;
+  }
+
+  .about-title h1 {
+    font-size: clamp(2rem, 2.3vw, 2.6rem);
+    line-height: 1.25;
+  }
+
+  .about-copy {
+    grid-column: 5 / span 4;
+    max-width: 402px;
+  }
+
+  .about-copy a {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .about-copy a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 980px) {
+    .about-title,
+    .about-copy {
+      grid-column: auto;
+      max-width: none;
+    }
+  }
 </style>
