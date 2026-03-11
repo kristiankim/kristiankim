@@ -12,7 +12,7 @@
     "studio:deploy": "sanity deploy --cwd studio"
   },
   "dependencies": {
-    "@sanity/client": "^7.16.0",
+    "@sanity/client": "^7.17.0",
     "@sanity/image-url": "^2.0.3",
     "astro": "^5.18.0",
     "groq": "^5.12.0",
@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
-    "@sanity/vision": "^5.12.0",
-    "sanity": "^5.12.0",
+    "@sanity/vision": "^5.14.1",
+    "sanity": "^5.14.1",
     "typescript": "^5.9.3"
   }
 }
