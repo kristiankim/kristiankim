@@ -12,11 +12,13 @@ const {
 const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`;
 const pathname = Astro.url.pathname;
 
+const isHome = pathname === '/';
+
 const navItems = [
-  { href: '/works', label: 'Works' },
-  { href: '/thoughts', label: 'Thoughts' },
+  { href: isHome ? '#works' : '/#works', label: 'Works' },
+  { href: isHome ? '#thoughts' : '/#thoughts', label: 'Thoughts' },
+  { href: isHome ? '#playground' : '/#playground', label: 'Playground' },
   { href: '/about', label: 'About' },
-  { href: '/tokens', label: 'Tokens' },
 ];
 ---
 
@@ -41,7 +43,7 @@ const navItems = [
         <a class="brand" href="/">Kristian Kim</a>
         <nav class="site-nav" aria-label="Primary">
           {navItems.map((item) => (
-            <a href={item.href} class={pathname.startsWith(item.href) ? 'active' : ''}>{item.label}</a>
+            <a href={item.href} class={item.href === '/about' && pathname.startsWith('/about') ? 'active' : ''}>{item.label}</a>
           ))}
         </nav>
         <div class="nav-spacer" aria-hidden="true"></div>
