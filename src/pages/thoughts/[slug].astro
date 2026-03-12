@@ -5,17 +5,81 @@ import { getPosts, urlFor } from '../../lib/sanity';
 
 export const prerender = false;
 
-type PortableChild = { _type?: string; text?: string };
+type PortableMarkDef = {
+  _key?: string;
+  _type?: string;
+  href?: string;
+};
+
+type PortableChild = {
+  _type?: string;
+  text?: string;
+  marks?: string[];
+};
+
 type PortableBlock = {
   _type?: string;
   _key?: string;
   style?: string;
+  listItem?: string;
+  level?: number;
   children?: PortableChild[];
+  markDefs?: PortableMarkDef[];
   asset?: unknown;
   alt?: string;
+  caption?: string;
+  quote?: string;
+  cite?: string;
+  title?: string;
+  text?: string;
+  items?: Array<{ label?: string; value?: string }>;
+  images?: Array<Record<string, any>>;
 };
 
-const toText = (block: PortableBlock) =>
+type BodyRenderItem =
+  | {
+      kind: 'block';
+      key: string;
+      block: PortableBlock;
+    }
+  | {
+      kind: 'list';
+      key: string;
+      listType: 'bullet' | 'number';
+      items: PortableBlock[];
+    };
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+
+const renderPortableChildren = (children: PortableChild[] = [], markDefs: PortableMarkDef[] = []) =>
+  children
+    .map((child) => {
+      if (child?._type !== 'span') return '';
+
+      let html = escapeHtml(child.text || '').replaceAll('\n', '<br />');
+
+      for (const mark of child.marks || []) {
+        const def = markDefs.find((item) => item._key === mark);
+
+        if (mark === 'strong') html = `<strong>${html}</strong>`;
+        else if (mark === 'em') html = `<em>${html}</em>`;
+        else if (mark === 'code') html = `<code>${html}</code>`;
+        else if (def?._type === 'link' && def.href) {
+          html = `<a href="${escapeHtml(def.href)}" target="_blank" rel="noreferrer">${html}</a>`;
+        }
+      }
+
+      return html;
+    })
+    .join('');
+
+const toPlainText = (block: PortableBlock) =>
   (block.children || [])
     .filter((child) => child?._type === 'span')
     .map((child) => child.text || '')
@@ -29,33 +93,90 @@ const slugify = (value: string) =>
     .trim()
     .replace(/\s+/g, '-');
 
+const splitParagraphs = (value?: string) =>
+  (value || '')
+    .split(/\n\s*\n/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const buildBodyItems = (blocks: PortableBlock[]) => {
+  const items: BodyRenderItem[] = [];
+
+  for (let index = 0; index < blocks.length; index += 1) {
+    const block = blocks[index];
+
+    if (block?._type === 'block' && block.listItem) {
+      const groupedItems = [block];
+      const listType = block.listItem === 'number' ? 'number' : 'bullet';
+      const level = block.level || 1;
+      let cursor = index + 1;
+
+      while (cursor < blocks.length) {
+        const nextBlock = blocks[cursor];
+
+        if (
+          nextBlock?._type === 'block' &&
+          nextBlock.listItem === block.listItem &&
+          (nextBlock.level || 1) === level
+        ) {
+          groupedItems.push(nextBlock);
+          cursor += 1;
+          continue;
+        }
+
+        break;
+      }
+
+      items.push({
+        kind: 'list',
+        key: block._key || `list-${index}`,
+        listType,
+        items: groupedItems,
+      });
+
+      index = cursor - 1;
+      continue;
+    }
+
+    items.push({
+      kind: 'block',
+      key: block?._key || `block-${index}`,
+      block,
+    });
+  }
+
+  return items;
+};
+
 const sanityPosts = await getPosts();
 const thoughts = sanityPosts.length
-  ? sanityPosts.map((p) => ({
-      slug: p.slug.current,
-      title: p.title,
-      category: p.category || 'Thoughts',
-      publishedAt: (p.publishedAt || '').slice(0, 10),
-      tags: p.tags?.length ? p.tags : ['Reflection', 'Personal'],
-      coverImageUrl: p.coverImage?.asset ? urlFor(p.coverImage)?.width(1400).quality(85).url() : null,
-      coverImageAlt: p.coverImage?.alt || p.title,
-      bodyBlocks: (p.body || []) as PortableBlock[],
+  ? sanityPosts.map((post) => ({
+      slug: post.slug.current,
+      title: post.title,
+      category: post.category || 'Thoughts',
+      publishedAt: (post.publishedAt || '').slice(0, 10),
+      tags: post.tags?.length ? post.tags : ['Reflection', 'Personal'],
+      coverImageUrl: post.coverImage?.asset ? urlFor(post.coverImage)?.width(1600).quality(85).url() : null,
+      coverImageAlt: post.coverImage?.alt || post.title,
+      bodyBlocks: (post.body || []) as PortableBlock[],
     }))
-  : fallbackThoughts.map((p) => ({
-      ...p,
+  : fallbackThoughts.map((post) => ({
+      ...post,
+      category: post.category || 'Thoughts',
       tags: ['Reflection', 'Personal'],
       coverImageUrl:
-        'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=1400&q=80',
-      coverImageAlt: p.title,
-      bodyBlocks: (p.sections || []).map((section, idx) => ({
+        'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=1600&q=80',
+      coverImageAlt: post.title,
+      bodyBlocks: (post.sections || []).map((section, index) => ({
         _type: 'block',
-        style: idx === 0 ? 'h2' : 'normal',
+        style: index === 0 ? 'h2' : 'normal',
         children: [{ _type: 'span', text: section }],
       })),
     }));
 
 const { slug } = Astro.params;
-const post = thoughts.find((p) => p.slug === slug);
+const post = thoughts.find((item) => item.slug === slug);
+
 if (!post) return Astro.redirect('/thoughts');
 
 const readableDate = post.publishedAt
@@ -69,7 +190,8 @@ const readableDate = post.publishedAt
 const headings = post.bodyBlocks
   .filter((block) => block._type === 'block' && (block.style === 'h2' || block.style === 'h3'))
   .map((block) => {
-    const text = toText(block);
+    const text = toPlainText(block);
+
     return {
       id: block._key || slugify(text),
       text,
@@ -77,29 +199,48 @@ const headings = post.bodyBlocks
     };
   })
   .filter((heading) => heading.text);
+
+const introBlocks = post.bodyBlocks.filter(
+  (block) => block._type === 'block' && (!block.style || block.style === 'normal') && !block.listItem
+);
+
+const firstHeadingIndex = post.bodyBlocks.findIndex(
+  (block) => block._type === 'block' && (block.style === 'h2' || block.style === 'h3')
+);
+
+const introKeySet = new Set(
+  (firstHeadingIndex > 0 ? post.bodyBlocks.slice(0, firstHeadingIndex) : introBlocks)
+    .filter((block) => block._type === 'block' && (!block.style || block.style === 'normal') && !block.listItem)
+    .map((block) => block._key)
+);
+
+const remainingBodyItems = buildBodyItems(
+  post.bodyBlocks.filter((block) => !introKeySet.has(block._key))
+);
 ---
 
 <BaseLayout title={post.title}>
-  <article class="article">
-    <section class="hero">
+  <article class="thought-article">
+    <section class="thought-hero">
       <div class="hero-copy">
         <h1>{post.title}</h1>
+
+        <div class="hero-meta">
+          <span>↳ {post.category}</span>
+          {readableDate && <span>{readableDate}</span>}
+          <span>{post.tags.join(' · ')}</span>
+        </div>
       </div>
+
       {post.coverImageUrl ? (
-        <img class="hero-media" src={post.coverImageUrl} alt={post.coverImageAlt} loading="lazy" />
+        <img class="hero-media" src={post.coverImageUrl} alt={post.coverImageAlt} loading="eager" />
       ) : (
         <div class="hero-media placeholder" aria-hidden="true"></div>
       )}
     </section>
 
-    <section class="meta-row">
-      <span>↳ {post.category}</span>
-      <span>{readableDate}</span>
-      <span>{post.tags.join(' · ')}</span>
-    </section>
-
-    <section class="content-grid">
-      <aside class="toc">
+    <section class="thought-grid">
+      <aside class="thought-toc">
         {headings.length ? (
           headings.map((heading) => (
             <a class={heading.level === 'h3' ? 'sub' : ''} href={`#${heading.id}`}>
@@ -107,34 +248,61 @@ const headings = post.bodyBlocks
             </a>
           ))
         ) : (
-          <span>No headings yet</span>
+          <span class="toc-empty">No headings yet</span>
         )}
       </aside>
 
-      <div class="body">
-        {post.bodyBlocks.map((block, idx) => {
-          if (block._type === 'block') {
-            const text = toText(block);
-            if (!text) return null;
+      <div class="thought-body detail-copy">
+        {introKeySet.size > 0 &&
+          post.bodyBlocks
+            .filter((block) => introKeySet.has(block._key))
+            .map((block) => <p set:html={renderPortableChildren(block.children, block.markDefs)} />)}
 
-            if (block.style === 'h2' || block.style === 'h3') {
-              const id = block._key || slugify(text);
-              return block.style === 'h3' ? <h3 id={id}>{text}</h3> : <h2 id={id}>{text}</h2>;
+        {remainingBodyItems.map((item, index) => {
+          if (item.kind === 'list') {
+            const ListTag = item.listType === 'number' ? 'ol' : 'ul';
+
+            return (
+              <ListTag class="article-list body-list">
+                {item.items.map((block) => (
+                  <li set:html={renderPortableChildren(block.children, block.markDefs)} />
+                ))}
+              </ListTag>
+            );
+          }
+
+          const block = item.block;
+
+          if (block._type === 'block') {
+            const html = renderPortableChildren(block.children, block.markDefs);
+            const plainText = toPlainText(block);
+
+            if (!html.trim()) return null;
+            if (block.style === 'h2') return <h2 id={block._key || slugify(plainText)}>{plainText}</h2>;
+            if (block.style === 'h3') return <h3 id={block._key || slugify(plainText)}>{plainText}</h3>;
+            if (block.style === 'h4') return <h4>{plainText}</h4>;
+            if (block.style === 'blockquote') {
+              return <blockquote class="quote-block"><p set:html={html} /></blockquote>;
             }
 
-            return <p>{text}</p>;
+            return <p set:html={html} />;
           }
 
           if (block._type === 'image' && block.asset) {
-            const imageUrl = urlFor(block)?.width(1400).quality(85).url();
-            return imageUrl ? <img class="content-image" src={imageUrl} alt={block.alt || `Image ${idx + 1}`} loading="lazy" /> : null;
+            const imageUrl = urlFor(block)?.width(1600).quality(84).url();
+            return imageUrl ? (
+              <figure class="media-block">
+                <img src={imageUrl} alt={block.alt || `Article image ${index + 1}`} loading="lazy" />
+                {block.caption && <figcaption>{block.caption}</figcaption>}
+              </figure>
+            ) : null;
           }
 
           if (block._type === 'quoteBlock') {
             return (
-              <blockquote class="quote-block">
-                <p>“{block.quote || ''}”</p>
-                {block.cite && <cite>— {block.cite}</cite>}
+              <blockquote class="quote-block callout-quote">
+                <p>{block.quote || ''}</p>
+                {block.cite && <cite>{block.cite}</cite>}
               </blockquote>
             );
           }
@@ -142,31 +310,38 @@ const headings = post.bodyBlocks
           if (block._type === 'calloutBlock') {
             return (
               <section class="callout-block">
-                {block.title && <h4>{block.title}</h4>}
-                <p>{block.text || ''}</p>
+                {block.title && <h3>{block.title}</h3>}
+                <div class="rich-copy">
+                  {splitParagraphs(block.text).map((paragraph) => <p>{paragraph}</p>)}
+                </div>
               </section>
             );
           }
 
-          if (block._type === 'metricsBlock' && Array.isArray(block.items)) {
+          if (block._type === 'metricsBlock' && Array.isArray(block.items) && block.items.length > 0) {
             return (
               <section class="metrics-grid">
-                {block.items.map((item) => (
-                  <article>
-                    <strong>{item.value || '-'}</strong>
-                    <span>{item.label || ''}</span>
+                {block.items.map((metric) => (
+                  <article class="metric-card">
+                    <strong>{metric.value || '-'}</strong>
+                    <span>{metric.label || ''}</span>
                   </article>
                 ))}
               </section>
             );
           }
 
-          if (block._type === 'galleryBlock' && Array.isArray(block.images)) {
+          if (block._type === 'galleryBlock' && Array.isArray(block.images) && block.images.length > 0) {
             return (
               <section class="gallery-grid">
-                {block.images.map((image, imageIdx) => {
-                  const imageUrl = urlFor(image)?.width(1100).quality(82).url();
-                  return imageUrl ? <img src={imageUrl} alt={image.alt || `Gallery image ${imageIdx + 1}`} loading="lazy" /> : null;
+                {block.images.map((image, imageIndex) => {
+                  const imageUrl = urlFor(image)?.width(1200).quality(82).url();
+                  return imageUrl ? (
+                    <figure class="gallery-item">
+                      <img src={imageUrl} alt={image.alt || `Gallery image ${imageIndex + 1}`} loading="lazy" />
+                      {image.caption && <figcaption>{image.caption}</figcaption>}
+                    </figure>
+                  ) : null;
                 })}
               </section>
             );
@@ -180,64 +355,247 @@ const headings = post.bodyBlocks
 </BaseLayout>
 
 <style>
-  .article { max-width: 1040px; }
-  .hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: 2rem; align-items: end; margin-top: 1.1rem; }
-  .hero-copy h1 { margin: 0; font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.04; letter-spacing: -0.024em; font-weight: 600; max-width: 15ch; }
-  .hero-media { width: 100%; aspect-ratio: 16 / 9; border-radius: 0.25rem; object-fit: cover; }
-  .hero-media.placeholder { background: var(--chip); }
-  .meta-row { margin-top: 1.8rem; border-bottom: 1px solid var(--line); padding-bottom: 0.9rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; color: var(--muted); font-size: 0.82rem; }
-  .content-grid { margin-top: 1.6rem; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2.4rem; }
-  .toc { display: grid; gap: 0.65rem; align-content: start; position: sticky; top: 1.2rem; font-size: 0.86rem; }
-  .toc a { color: var(--muted); text-decoration: none; }
-  .toc a.sub { padding-left: 0.85rem; }
-  .toc a:hover { color: var(--text); }
-  .body { max-width: 680px; display: grid; gap: 1rem; }
-  .body h2, .body h3 { margin: 1rem 0 0.2rem; font-size: 1.85rem; letter-spacing: -0.018em; font-weight: 600; }
-  .body h3 { font-size: 1.35rem; }
-  .body p { margin: 0; color: var(--muted); line-height: 1.75; font-size: 1rem; }
-  .content-image { width: 100%; border-radius: 0.35rem; margin: 0.6rem 0; }
-  .quote-block {
-    margin: 1rem 0;
-    padding: 1rem 1.1rem;
-    border-left: 3px solid var(--line);
-    background: var(--surface);
+  .thought-article {
+    display: grid;
+    gap: 24px;
   }
-  .quote-block p { margin: 0; font-size: 1.03rem; color: var(--text); }
-  .quote-block cite { display: block; margin-top: 0.6rem; color: var(--muted); font-style: normal; font-size: 0.9rem; }
-  .callout-block {
+
+  .thought-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    min-height: 600px;
+  }
+
+  .hero-copy {
+    display: grid;
+    gap: 40px;
+    align-content: start;
+    padding-top: 4px;
+  }
+
+  .hero-copy h1 {
+    max-width: 14ch;
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .hero-media {
+    width: 100%;
+    aspect-ratio: 1112 / 626;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .hero-media.placeholder {
     border: 1px solid var(--line);
-    border-radius: 0.45rem;
-    padding: 0.9rem 1rem;
-    background: var(--surface);
   }
-  .callout-block h4 { margin: 0 0 0.3rem; font-size: 0.96rem; }
-  .callout-block p { margin: 0; }
+
+  .thought-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .thought-toc {
+    position: sticky;
+    top: 70px;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    width: 260px;
+    padding: 24px 0;
+  }
+
+  .thought-toc a,
+  .toc-empty {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .thought-toc a:hover {
+    color: var(--text);
+  }
+
+  .thought-toc a.sub {
+    padding-left: 16px;
+  }
+
+  .thought-body {
+    display: grid;
+    gap: 24px;
+    padding: 24px 0;
+  }
+
+  .thought-body h2,
+  .thought-body h3 {
+    max-width: 827px;
+    font-size: 24px;
+    line-height: 28px;
+    font-family: var(--font-serif);
+  }
+
+  .thought-body h4 {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .thought-body p,
+  .article-list li,
+  .callout-block p,
+  .quote-block cite,
+  figcaption {
+    max-width: 827px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .article-list {
+    margin: 0;
+    padding-left: 24px;
+    max-width: 827px;
+  }
+
+  .body-list {
+    margin-top: -8px;
+  }
+
+  .media-block,
+  .gallery-grid,
+  .gallery-item {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .media-block,
+  .gallery-grid {
+    width: 100%;
+    max-width: 1112px;
+  }
+
+  .media-block img,
+  .gallery-grid img {
+    width: 100%;
+    object-fit: cover;
+  }
+
+  figcaption {
+    font-size: 12px;
+    line-height: 1.2;
+    font-style: italic;
+  }
+
+  .quote-block {
+    display: grid;
+    gap: 8px;
+    max-width: 827px;
+    margin: 0;
+    padding-left: 20px;
+    border-left: 1px solid var(--line);
+  }
+
+  .quote-block p {
+    color: var(--text);
+  }
+
+  .callout-quote cite {
+    font-style: normal;
+  }
+
+  .callout-block,
+  .rich-copy {
+    display: grid;
+    gap: 8px;
+    max-width: 827px;
+  }
+
+  .callout-block {
+    padding: 20px 24px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.52);
+  }
+
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.7rem;
+    gap: 12px;
+    max-width: 827px;
   }
-  .metrics-grid article {
-    border: 1px solid var(--line);
-    border-radius: 0.45rem;
-    padding: 0.75rem;
-    background: var(--surface);
-  }
-  .metrics-grid strong { display: block; font-size: 1.1rem; letter-spacing: -0.02em; }
-  .metrics-grid span { color: var(--muted); font-size: 0.85rem; }
-  .gallery-grid {
+
+  .metric-card {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.7rem;
+    gap: 4px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.56);
   }
-  .gallery-grid img { width: 100%; border-radius: 0.35rem; aspect-ratio: 16/10; object-fit: cover; }
-  @media (max-width: 920px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-copy h1 { max-width: none; }
-    .content-grid { grid-template-columns: 1fr; gap: 1rem; }
-    .toc { position: static; padding-bottom: 0.8rem; border-bottom: 1px solid var(--line); }
-    .meta-row { grid-template-columns: 1fr; gap: 0.3rem; }
-    .metrics-grid { grid-template-columns: 1fr; }
-    .gallery-grid { grid-template-columns: 1fr; }
+
+  .metric-card strong {
+    color: var(--text);
+    font-size: 24px;
+    line-height: 28px;
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .gallery-grid img {
+    aspect-ratio: 1112 / 647;
+  }
+
+  @media (max-width: 1120px) {
+    .thought-hero,
+    .thought-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .thought-hero {
+      min-height: 0;
+    }
+
+    .hero-copy h1,
+    .thought-toc {
+      max-width: none;
+      width: 100%;
+    }
+
+    .thought-toc {
+      position: static;
+      padding-bottom: 0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero-copy {
+      gap: 24px;
+    }
+
+    .hero-meta {
+      gap: 12px 20px;
+    }
+
+    .metrics-grid,
+    .gallery-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

@@ -12,6 +12,25 @@ export const post = defineType({
     defineField({ name: 'coverImage', title: 'Cover image', type: 'image', options: { hotspot: true }, fields: [{ name: 'alt', title: 'Alt text', type: 'string' }] }),
     defineField({ name: 'publishedAt', title: 'Published at', type: 'datetime' }),
     defineField({ name: 'author', title: 'Author', type: 'reference', to: [{ type: 'author' }] }),
-    defineField({ name: 'body', title: 'Body', type: 'array', of: [{ type: 'block' }, { type: 'image' }, { type: 'quoteBlock' }, { type: 'calloutBlock' }, { type: 'metricsBlock' }, { type: 'galleryBlock' }] }),
+    defineField({
+      name: 'body',
+      title: 'Body',
+      type: 'array',
+      of: [
+        { type: 'block' },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'alt', title: 'Alt text', type: 'string' },
+            { name: 'caption', title: 'Caption', type: 'string' },
+          ],
+        },
+        { type: 'quoteBlock' },
+        { type: 'calloutBlock' },
+        { type: 'metricsBlock' },
+        { type: 'galleryBlock' },
+      ],
+    }),
   ],
 });
