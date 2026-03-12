@@ -3,13 +3,28 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { projects as fallbackProjects } from '../../data/content';
 import { getProjects, urlFor } from '../../lib/sanity';
 
-const sanityProjects = await getProjects();
-type PortableChild = { _type?: string; text?: string };
+export const prerender = false;
+
+type PortableMarkDef = {
+  _key?: string;
+  _type?: string;
+  href?: string;
+};
+
+type PortableChild = {
+  _type?: string;
+  text?: string;
+  marks?: string[];
+};
+
 type PortableBlock = {
   _type?: string;
   _key?: string;
   style?: string;
+  listItem?: string;
+  level?: number;
   children?: PortableChild[];
+  markDefs?: PortableMarkDef[];
   asset?: unknown;
   alt?: string;
   quote?: string;
@@ -20,82 +35,262 @@ type PortableBlock = {
   images?: Array<Record<string, any>>;
 };
 
-const toText = (block: PortableBlock) =>
+type BodyRenderItem =
+  | {
+      kind: 'block';
+      key: string;
+      block: PortableBlock;
+    }
+  | {
+      kind: 'list';
+      key: string;
+      listType: 'bullet' | 'number';
+      items: PortableBlock[];
+    };
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+
+const renderPortableChildren = (children: PortableChild[] = [], markDefs: PortableMarkDef[] = []) =>
+  children
+    .map((child) => {
+      if (child?._type !== 'span') return '';
+
+      let html = escapeHtml(child.text || '').replaceAll('\n', '<br />');
+
+      for (const mark of child.marks || []) {
+        const def = markDefs.find((item) => item._key === mark);
+
+        if (mark === 'strong') html = `<strong>${html}</strong>`;
+        else if (mark === 'em') html = `<em>${html}</em>`;
+        else if (mark === 'code') html = `<code>${html}</code>`;
+        else if (def?._type === 'link' && def.href) {
+          html = `<a href="${escapeHtml(def.href)}" target="_blank" rel="noreferrer">${html}</a>`;
+        }
+      }
+
+      return html;
+    })
+    .join('');
+
+const toPlainText = (block: PortableBlock) =>
   (block.children || [])
     .filter((child) => child?._type === 'span')
     .map((child) => child.text || '')
     .join('')
     .trim();
 
+const splitParagraphs = (value?: string) =>
+  (value || '')
+    .split(/\n\s*\n/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const buildBodyItems = (blocks: PortableBlock[]) => {
+  const items: BodyRenderItem[] = [];
+
+  for (let index = 0; index < blocks.length; index += 1) {
+    const block = blocks[index];
+
+    if (block?._type === 'block' && block.listItem) {
+      const groupedItems = [block];
+      const listType = block.listItem === 'number' ? 'number' : 'bullet';
+      const level = block.level || 1;
+      let cursor = index + 1;
+
+      while (cursor < blocks.length) {
+        const nextBlock = blocks[cursor];
+
+        if (
+          nextBlock?._type === 'block' &&
+          nextBlock.listItem === block.listItem &&
+          (nextBlock.level || 1) === level
+        ) {
+          groupedItems.push(nextBlock);
+          cursor += 1;
+          continue;
+        }
+
+        break;
+      }
+
+      items.push({
+        kind: 'list',
+        key: block._key || `list-${index}`,
+        listType,
+        items: groupedItems,
+      });
+
+      index = cursor - 1;
+      continue;
+    }
+
+    items.push({
+      kind: 'block',
+      key: block?._key || `block-${index}`,
+      block,
+    });
+  }
+
+  return items;
+};
+
+const sanityProjects = await getProjects();
 const projects = sanityProjects.length
-  ? sanityProjects.map((p) => ({
-      ...p,
-      slug: p.slug.current,
-      coverImageUrl: p.cover?.asset ? urlFor(p.cover)?.width(1800).quality(85).url() : null,
-      teamMembers: p.teamMembers ?? [],
-      bodyBlocks: (p.body || []) as PortableBlock[],
-      impact: p.impact ?? [],
-      isPrivate: Boolean(p.isPrivate),
+  ? sanityProjects.map((project) => ({
+      ...project,
+      slug: project.slug.current,
+      coverImageUrl: project.cover?.asset ? urlFor(project.cover)?.width(1800).quality(86).url() : null,
+      coverImageAlt: project.cover?.alt || project.title,
+      teamMembers: project.teamMembers ?? [],
+      bodyBlocks: (project.body || []) as PortableBlock[],
+      impact: project.impact ?? [],
+      isPrivate: Boolean(project.isPrivate),
+      tldr: project.tldr || '',
     }))
-  : fallbackProjects.map((p) => ({ ...p, coverImageUrl: null, bodyBlocks: [] }));
-
-export async function getStaticPaths() {
-  const { getProjects } = await import('../../lib/sanity');
-  const { projects: fallbackProjects } = await import('../../data/content');
-  const sanityProjects = await getProjects();
-  const items = sanityProjects.length
-    ? sanityProjects.map((p) => ({ slug: p.slug.current }))
-    : fallbackProjects.map((p) => ({ slug: p.slug }));
-
-  return items.map((project) => ({ params: { slug: project.slug } }));
-}
+  : fallbackProjects.map((project) => ({
+      ...project,
+      coverImageUrl: null,
+      coverImageAlt: project.title,
+      bodyBlocks: [] as PortableBlock[],
+      impact: project.impact ?? [],
+      isPrivate: Boolean(project.isPrivate),
+      tldr: '',
+    }));
 
 const { slug } = Astro.params;
-const project = projects.find((p) => p.slug === slug);
+const project = projects.find((item) => item.slug === slug);
+
 if (!project) return Astro.redirect('/works');
+
+const summaryParagraphs = splitParagraphs(project.tldr);
+const overviewParagraphs = splitParagraphs(project.overview);
+const bodyItems = buildBodyItems(project.bodyBlocks);
+const hasTldr = summaryParagraphs.length > 0;
 ---
-<BaseLayout title={project.title}>
-  <article class="case">
-    {project.coverImageUrl && (
-      <img class="cover" src={project.coverImageUrl} alt={project.title} loading="lazy" />
-    )}
 
-    <h1>{project.title}</h1>
-    {project.isPrivate && <p class="private">Private case study</p>}
+<BaseLayout title={project.title} description={project.tldr || project.overview || project.title}>
+  <article class="work-article">
+    <section class="work-hero">
+      <div class="hero-copy">
+        <h1>{project.title}</h1>
 
-    <h2>Meta data</h2>
-    <ul>
-      <li>Year: {project.year}</li>
-      <li>Company: {project.company}</li>
-      <li>Website: {project.website || 'N/A'}</li>
-      <li>Team members: {(project.teamMembers || []).join(', ')}</li>
-      <li>Role: {project.role}</li>
-    </ul>
+        <div class="hero-meta">
+          {project.year && (
+            <div class="meta-item">
+              <span class="meta-label">Year</span>
+              <span class="meta-value">{project.year}</span>
+            </div>
+          )}
 
-    <h2>Overview</h2>
-    <p>{project.overview}</p>
+          {project.company && (
+            <div class="meta-item">
+              <span class="meta-label">Company</span>
+              {project.website ? (
+                <a class="meta-link" href={project.website} target="_blank" rel="noreferrer">
+                  {project.company}
+                </a>
+              ) : (
+                <span class="meta-value">{project.company}</span>
+              )}
+            </div>
+          )}
 
-    <h2>Case study</h2>
-    {project.bodyBlocks.length ? (
-      <div class="case-body">
-        {project.bodyBlocks.map((block, idx) => {
+          {project.role && (
+            <div class="meta-item">
+              <span class="meta-label">Role</span>
+              <span class="meta-value">{project.role}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {project.coverImageUrl ? (
+        <img class="hero-media" src={project.coverImageUrl} alt={project.coverImageAlt} loading="eager" />
+      ) : (
+        <div class="hero-media placeholder" aria-hidden="true"></div>
+      )}
+    </section>
+
+    <section class="article-grid">
+      {hasTldr ? (
+        <aside class="article-aside">
+          <div class="aside-header">
+            <span class="aside-title">TLDR</span>
+          </div>
+
+          <div class="aside-copy">
+            {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+          </div>
+        </aside>
+      ) : (
+        <div class="article-aside-spacer" aria-hidden="true"></div>
+      )}
+
+      <div class="article-body detail-copy">
+        {project.teamMembers.length > 0 && (
+          <section class="content-section">
+            <h2>Teams</h2>
+            <ul class="article-list">
+              {project.teamMembers.map((member) => <li>{member}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {overviewParagraphs.length > 0 && (
+          <section class="content-section">
+            <h2>Overview</h2>
+            <div class="rich-copy">
+              {overviewParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          </section>
+        )}
+
+        {bodyItems.map((item, index) => {
+          if (item.kind === 'list') {
+            const ListTag = item.listType === 'number' ? 'ol' : 'ul';
+
+            return (
+              <ListTag class="article-list body-list">
+                {item.items.map((block) => (
+                  <li set:html={renderPortableChildren(block.children, block.markDefs)} />
+                ))}
+              </ListTag>
+            );
+          }
+
+          const block = item.block;
+
           if (block._type === 'block') {
-            const text = toText(block);
-            if (!text) return null;
-            if (block.style === 'h2') return <h3>{text}</h3>;
-            return <p>{text}</p>;
+            const html = renderPortableChildren(block.children, block.markDefs);
+            const plainText = toPlainText(block);
+
+            if (!html.trim()) return null;
+            if (block.style === 'h2') return <h2>{plainText}</h2>;
+            if (block.style === 'h3') return <h3>{plainText}</h3>;
+            if (block.style === 'h4') return <h4>{plainText}</h4>;
+            if (block.style === 'blockquote') {
+              return <blockquote class="quote-block"><p set:html={html} /></blockquote>;
+            }
+
+            return <p set:html={html} />;
           }
 
           if (block._type === 'image' && block.asset) {
-            const imageUrl = urlFor(block)?.width(1600).quality(85).url();
-            return imageUrl ? <img class="content-image" src={imageUrl} alt={block.alt || `Case image ${idx + 1}`} loading="lazy" /> : null;
+            const imageUrl = urlFor(block)?.width(1600).quality(84).url();
+            return imageUrl ? <img class="content-image" src={imageUrl} alt={block.alt || `Case study image ${index + 1}`} loading="lazy" /> : null;
           }
 
           if (block._type === 'quoteBlock') {
             return (
-              <blockquote class="quote-block">
-                <p>“{block.quote || ''}”</p>
-                {block.cite && <cite>— {block.cite}</cite>}
+              <blockquote class="quote-block callout-quote">
+                <p>{block.quote || ''}</p>
+                {block.cite && <cite>{block.cite}</cite>}
               </blockquote>
             );
           }
@@ -103,31 +298,33 @@ if (!project) return Astro.redirect('/works');
           if (block._type === 'calloutBlock') {
             return (
               <section class="callout-block">
-                {block.title && <h4>{block.title}</h4>}
-                <p>{block.text || ''}</p>
+                {block.title && <h3>{block.title}</h3>}
+                <div class="rich-copy">
+                  {splitParagraphs(block.text).map((paragraph) => <p>{paragraph}</p>)}
+                </div>
               </section>
             );
           }
 
-          if (block._type === 'metricsBlock' && Array.isArray(block.items)) {
+          if (block._type === 'metricsBlock' && Array.isArray(block.items) && block.items.length > 0) {
             return (
               <section class="metrics-grid">
-                {block.items.map((item) => (
-                  <article>
-                    <strong>{item.value || '-'}</strong>
-                    <span>{item.label || ''}</span>
+                {block.items.map((metric) => (
+                  <article class="metric-card">
+                    <strong>{metric.value || '-'}</strong>
+                    <span>{metric.label || ''}</span>
                   </article>
                 ))}
               </section>
             );
           }
 
-          if (block._type === 'galleryBlock' && Array.isArray(block.images)) {
+          if (block._type === 'galleryBlock' && Array.isArray(block.images) && block.images.length > 0) {
             return (
               <section class="gallery-grid">
-                {block.images.map((image, imageIdx) => {
+                {block.images.map((image, imageIndex) => {
                   const imageUrl = urlFor(image)?.width(1200).quality(82).url();
-                  return imageUrl ? <img src={imageUrl} alt={image.alt || `Gallery image ${imageIdx + 1}`} loading="lazy" /> : null;
+                  return imageUrl ? <img src={imageUrl} alt={image.alt || `Gallery image ${imageIndex + 1}`} loading="lazy" /> : null;
                 })}
               </section>
             );
@@ -135,58 +332,287 @@ if (!project) return Astro.redirect('/works');
 
           return null;
         })}
-      </div>
-    ) : (
-      <p>No case study blocks yet.</p>
-    )}
 
-    <h2>Outcome / impact metrics</h2>
-    <ul>
-      {(project.impact || []).map((item) => <li>{item}</li>)}
-    </ul>
+      </div>
+    </section>
   </article>
 </BaseLayout>
 
 <style>
-  .case { max-width: 100%; }
-  .cover {
+  .work-article {
+    display: grid;
+    gap: 24px;
+  }
+
+  .work-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    min-height: 600px;
+  }
+
+  .hero-copy {
+    display: grid;
+    gap: 40px;
+    align-content: start;
+    padding-top: 4px;
+  }
+
+  .hero-copy h1 {
+    max-width: 14ch;
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .meta-item {
+    display: grid;
+    gap: 8px;
+    min-width: 80px;
+  }
+
+  .meta-label,
+  .meta-value,
+  .meta-link {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .meta-label {
+    color: var(--muted);
+  }
+
+  .meta-value,
+  .meta-link {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .meta-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .hero-media {
     width: 100%;
-    aspect-ratio: 16 / 7;
+    height: 696px;
     object-fit: cover;
-    border-radius: .35rem;
-    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.72);
   }
-  h1 { margin: 0 0 0.8rem; font-size: clamp(1.8rem, 3.2vw, 2.6rem); letter-spacing: -0.02em; }
-  h2 { margin: 2rem 0 .8rem; font-size: 1.05rem; letter-spacing: -0.01em; }
-  p, li { color: var(--muted); }
-  ul { margin: 0; padding-left: 1.1rem; }
-  .private { display: inline-block; color: var(--muted); border: 1px solid var(--line); padding: .2rem .5rem; border-radius: 999px; font-size: .82rem; }
-  .case-body { display: grid; gap: 1rem; }
-  .case-body h3 { margin: 0.4rem 0 0; font-size: 1.4rem; letter-spacing: -0.02em; }
-  .content-image { width: 100%; border-radius: 0.35rem; }
-  .quote-block {
-    margin: 0;
-    padding: 1rem 1.1rem;
-    border-left: 3px solid var(--line);
-    background: var(--surface);
-  }
-  .quote-block p { margin: 0; color: var(--text); }
-  .quote-block cite { display: block; margin-top: 0.5rem; font-size: 0.9rem; color: var(--muted); font-style: normal; }
-  .callout-block {
+
+  .hero-media.placeholder {
     border: 1px solid var(--line);
-    border-radius: 0.45rem;
-    padding: 0.9rem 1rem;
-    background: var(--surface);
   }
-  .callout-block h4 { margin: 0 0 0.3rem; font-size: 0.96rem; }
-  .callout-block p { margin: 0; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
-  .metrics-grid article { border: 1px solid var(--line); border-radius: 0.45rem; padding: 0.75rem; background: var(--surface); }
-  .metrics-grid strong { display: block; font-size: 1.1rem; letter-spacing: -0.02em; color: var(--text); }
-  .metrics-grid span { color: var(--muted); font-size: 0.85rem; }
-  .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
-  .gallery-grid img { width: 100%; border-radius: 0.35rem; aspect-ratio: 16/10; object-fit: cover; }
-  @media (max-width: 900px) {
-    .metrics-grid, .gallery-grid { grid-template-columns: 1fr; }
+
+  .article-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .article-aside {
+    position: sticky;
+    top: 70px;
+    display: grid;
+    gap: 16px;
+    padding: 24px 0;
+  }
+
+  .article-aside-spacer {
+    min-height: 1px;
+  }
+
+  .aside-header {
+    width: min(402px, 100%);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--text);
+  }
+
+  .aside-title {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .aside-copy {
+    width: min(402px, 100%);
+  }
+
+  .aside-copy p {
+    color: var(--muted);
+    line-height: 24px;
+  }
+
+  .aside-copy p + p {
+    margin-top: 16px;
+  }
+
+  .article-body {
+    display: grid;
+    gap: 24px;
+    padding: 24px 0;
+  }
+
+  .content-section,
+  .rich-copy,
+  .callout-block {
+    display: grid;
+    gap: 8px;
+    max-width: 827px;
+  }
+
+  .article-body h2,
+  .article-body h3 {
+    font-size: 24px;
+    line-height: 28px;
+    font-family: var(--font-serif);
+  }
+
+  .article-body h4 {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .article-body p,
+  .article-list li,
+  .callout-block p,
+  .quote-block cite {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .article-list {
+    margin: 0;
+    padding-left: 24px;
+    max-width: 827px;
+  }
+
+  .body-list {
+    margin-top: -8px;
+  }
+
+  .content-image {
+    width: 100%;
+    max-width: 1112px;
+    object-fit: cover;
+  }
+
+  .quote-block {
+    display: grid;
+    gap: 8px;
+    max-width: 827px;
+    margin: 0;
+    padding-left: 20px;
+    border-left: 1px solid var(--line);
+  }
+
+  .quote-block p {
+    color: var(--text);
+  }
+
+  .callout-quote cite {
+    font-style: normal;
+  }
+
+  .callout-block {
+    padding: 20px 24px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.52);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 827px;
+  }
+
+  .metric-card {
+    display: grid;
+    gap: 4px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .metric-card strong {
+    color: var(--text);
+    font-size: 24px;
+    line-height: 28px;
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1112px;
+  }
+
+  .gallery-grid img {
+    width: 100%;
+    aspect-ratio: 543 / 625;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1120px) {
+    .work-hero,
+    .article-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .work-hero {
+      min-height: 0;
+    }
+
+    .hero-copy h1 {
+      max-width: none;
+    }
+
+    .hero-media {
+      height: auto;
+      min-height: 320px;
+    }
+
+    .article-aside {
+      position: static;
+      padding-bottom: 0;
+    }
+
+    .aside-header,
+    .aside-copy {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero-copy {
+      gap: 24px;
+    }
+
+    .hero-meta {
+      gap: 16px;
+    }
+
+    .article-body {
+      gap: 20px;
+    }
+
+    .metrics-grid,
+    .gallery-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

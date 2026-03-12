@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { thoughts as fallbackThoughts } from '../../data/content';
 import { getPosts, urlFor } from '../../lib/sanity';
 
+export const prerender = false;
+
 type PortableChild = { _type?: string; text?: string };
 type PortableBlock = {
   _type?: string;
@@ -51,17 +53,6 @@ const thoughts = sanityPosts.length
         children: [{ _type: 'span', text: section }],
       })),
     }));
-
-export async function getStaticPaths() {
-  const { getPosts } = await import('../../lib/sanity');
-  const { thoughts: fallbackThoughts } = await import('../../data/content');
-  const sanityPosts = await getPosts();
-  const items = sanityPosts.length
-    ? sanityPosts.map((p) => ({ slug: p.slug.current }))
-    : fallbackThoughts.map((p) => ({ slug: p.slug }));
-
-  return items.map((post) => ({ params: { slug: post.slug } }));
-}
 
 const { slug } = Astro.params;
 const post = thoughts.find((p) => p.slug === slug);

@@ -19,6 +19,7 @@ export const project = defineType({
     defineField({ name: 'website', title: 'Website', type: 'url' }),
     defineField({ name: 'teamMembers', title: 'Team members', type: 'array', of: [{ type: 'string' }] }),
     defineField({ name: 'role', title: 'Role', type: 'string' }),
+    defineField({ name: 'tldr', title: 'TLDR', type: 'text', rows: 4 }),
     defineField({ name: 'overview', title: 'Overview', type: 'text', rows: 4 }),
     defineField({ name: 'body', title: 'Case study', type: 'array', of: [{ type: 'block' }, { type: 'image' }, { type: 'quoteBlock' }, { type: 'calloutBlock' }, { type: 'metricsBlock' }, { type: 'galleryBlock' }] }),
     defineField({ name: 'impact', title: 'Outcome / impact metrics', type: 'array', of: [{ type: 'string' }] }),

@@ -33,6 +33,7 @@ export type SanityProject = {
   website?: string;
   teamMembers?: string[];
   role?: string;
+  tldr?: string;
   overview?: string;
   isPrivate?: boolean;
   impact?: string[];
@@ -56,7 +57,7 @@ export async function getProjects(): Promise<SanityProject[]> {
   if (!sanity) return [];
   return sanity.fetch(
     groq`*[_type == "project"] | order(coalesce(year, "") desc, _createdAt desc){
-      _id,title,slug,cover{asset,alt},year,company,website,teamMembers,role,overview,body,isPrivate,impact
+      _id,title,slug,cover{asset,alt},year,company,website,teamMembers,role,tldr,overview,body,isPrivate,impact
     }`
   );
 }
