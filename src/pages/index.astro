@@ -136,11 +136,21 @@ const works = sanityProjects.length
     </div>
     <div class="playground-grid">
       {playground.map((item) => (
-        <article class="playground-tile">
-          <img src={item.thumb} alt={item.title} loading="lazy" />
-          <div class="playground-tile-copy">
+        <article class="playground-card">
+          <div class="playground-card-copy">
             <h2>{item.title}</h2>
             <p>{item.caption}</p>
+            <a class="playground-card-link" href={item.thumb} target="_blank" rel="noreferrer">View</a>
+          </div>
+          <div class="playground-card-media">
+            <div class="playground-browser">
+              <div class="playground-browser-header" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <img src={item.thumb} alt={item.title} loading="lazy" />
+            </div>
           </div>
         </article>
       ))}
@@ -318,26 +328,98 @@ const works = sanityProjects.length
     gap: 24px;
   }
 
-  .playground-tile {
+  .playground-card {
+    min-height: 495px;
     display: grid;
-    gap: 24px;
-    align-content: start;
+    grid-template-rows: auto 1fr;
+    gap: 40px;
+    padding-top: 24px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    overflow: clip;
   }
 
-  .playground-tile-copy {
+  .playground-card-copy {
     display: grid;
     gap: 8px;
+    padding: 0 24px;
   }
 
-  .playground-tile-copy h2 {
+  .playground-card-copy h2 {
     font-size: 24px;
     line-height: 1.1667;
   }
 
-  .playground-tile img {
+  .playground-card-copy p {
+    height: 70px;
+    overflow: hidden;
+  }
+
+  .playground-card-link {
+    color: #1936ef;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.375;
+    width: fit-content;
+  }
+
+  .playground-card-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .playground-card-media {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .playground-browser {
+    position: absolute;
+    inset: auto auto -12px calc(50% + 6px);
+    width: min(91%, 495px);
+    aspect-ratio: 495 / 314;
+    transform: translate3d(-50%, 0, 0);
+    border: 4px solid #ddd;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: -17px 28px 0 5px rgba(97, 97, 97, 0.15);
+    overflow: hidden;
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease;
+    will-change: transform, box-shadow;
+  }
+
+  .playground-browser-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 47px;
+    padding: 0 18px;
+    border-bottom: 1px solid #ececec;
+    background: #f8f8f8;
+  }
+
+  .playground-browser-header span {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #d0d0d0;
+  }
+
+  .playground-browser img {
     width: 100%;
-    aspect-ratio: 544 / 360;
-    object-fit: cover;
+    height: calc(100% - 47px);
+    object-fit: contain;
+    object-position: center bottom;
+    background: #f4f4f4;
+  }
+
+  .playground-card:hover .playground-browser {
+    transform: translate3d(-50%, -8px, 0);
+    box-shadow: -17px 36px 0 5px rgba(97, 97, 97, 0.18);
   }
 
   @media (max-width: 980px) {
@@ -372,6 +454,22 @@ const works = sanityProjects.length
 
     .playground-grid {
       grid-template-columns: 1fr;
+    }
+
+    .playground-card {
+      min-height: 0;
+    }
+
+    .playground-browser {
+      position: relative;
+      inset: auto;
+      width: calc(100% - 32px);
+      margin: 0 auto -12px;
+      transform: none;
+    }
+
+    .playground-card:hover .playground-browser {
+      transform: translateY(-6px);
     }
   }
 </style>
