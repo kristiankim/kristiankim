@@ -11,6 +11,14 @@ const {
 
 const fullTitle = title === 'Kristian Kim' ? title : `Kristian Kim — ${title}`;
 const pathname = Astro.url.pathname;
+const easternTimeFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/New_York',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+  timeZoneName: 'short',
+});
+const initialEasternTime = easternTimeFormatter.format(new Date()).replace(/\s(?=[A-Z]{3}$)/, '');
 
 const isHome = pathname === '/';
 
@@ -54,6 +62,16 @@ const navItems = [
       <slot />
     </main>
 
+    <footer class="site-footer site-shell" aria-label="Site footer">
+      <div class="site-footer-inner">
+        <p class="footer-copy">© 2026 Kristian Kim</p>
+        <div class="footer-meta" aria-label="Location and note">
+          <p id="footer-time" aria-label="Current Eastern Time">{initialEasternTime}</p>
+          <p>John 3:16</p>
+        </div>
+      </div>
+    </footer>
+
     <script type="module">
       import Lenis from 'lenis';
 
@@ -77,6 +95,25 @@ const navItems = [
         if (!nav) return;
         nav.classList.toggle('scrolled', window.scrollY > 12);
       }, { passive: true });
+
+      const footerTime = document.getElementById('footer-time');
+
+      if (footerTime) {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/New_York',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZoneName: 'short',
+        });
+
+        const updateFooterTime = () => {
+          footerTime.textContent = formatter.format(new Date()).replace(/\s(?=[A-Z]{3}$)/, '');
+        };
+
+        updateFooterTime();
+        setInterval(updateFooterTime, 30_000);
+      }
 
       const revealNodes = document.querySelectorAll(
         '.reveal-item, .hero-intro, .hero-body, .hero-visual, .section-heading, .project-row, .writing-row, .playground-card, .detail-copy'
@@ -277,6 +314,34 @@ const navItems = [
     padding: 40px 0 80px;
   }
 
+  .site-footer {
+    padding: 0 0 28px;
+  }
+
+  .site-footer-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .site-footer p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+    text-align: right;
+  }
+
   .reveal-item {
     opacity: 0;
     transform: translateY(18px);
@@ -331,6 +396,23 @@ const navItems = [
 
     main {
       padding: 28px 0 64px;
+    }
+
+    .site-footer {
+      padding-bottom: 20px;
+    }
+
+    .site-footer-inner {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .footer-meta {
+      width: 100%;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
     }
   }
 </style>
