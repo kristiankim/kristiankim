@@ -23,7 +23,7 @@ const initialEasternTime = easternTimeFormatter.format(new Date()).replace(/\s(?
 const isHome = pathname === '/';
 
 const navItems = [
-  { href: isHome ? '#works' : '/#works', label: 'Works' },
+  { href: '/works', label: 'Works' },
   { href: isHome ? '#thoughts' : '/#thoughts', label: 'Thoughts' },
   { href: isHome ? '#playground' : '/#playground', label: 'Playground' },
   { href: '/about', label: 'About' },
@@ -51,7 +51,7 @@ const navItems = [
         <a class="brand" href="/">Kristian Kim</a>
         <nav class="site-nav" aria-label="Primary">
           {navItems.map((item) => (
-            <a href={item.href} class={item.href === '/about' && pathname.startsWith('/about') ? 'active' : ''}>{item.label}</a>
+            <a href={item.href} class={item.href.startsWith('/') && item.href !== '/' && pathname.startsWith(item.href) ? 'active' : ''}>{item.label}</a>
           ))}
         </nav>
         <div class="nav-spacer" aria-hidden="true"></div>
@@ -250,6 +250,15 @@ const navItems = [
 
   .detail-copy p + p {
     margin-top: 16px;
+  }
+
+  .detail-copy a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .detail-copy a:hover {
+    color: var(--text);
   }
 
   .topnav {

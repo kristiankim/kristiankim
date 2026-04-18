@@ -57,7 +57,7 @@ const works = sanityProjects.length
     </div>
     <div class="hero-body detail-copy">
       <p>{home.body}</p>
-      <p>{home.longBio}</p>
+      <p set:html={home.longBio} />
     </div>
     <div class="hero-visual">
       <img
@@ -89,7 +89,7 @@ const works = sanityProjects.length
 
   <section id="works" class="section-block">
     <div class="section-header">
-      <div class="section-heading">Selected work</div>
+      <a class="section-heading section-heading-link" href="/works"><span>Selected work</span><span class="section-heading-arrow" aria-hidden="true">→</span></a>
     </div>
     <div class="selected-work-list">
       {works.map((project) => (
@@ -117,7 +117,7 @@ const works = sanityProjects.length
 
   <section id="thoughts" class="section-block">
     <div class="section-header">
-      <div class="section-heading">Writings</div>
+      <a class="section-heading section-heading-link" href="/thoughts"><span>Writings</span><span class="section-heading-arrow" aria-hidden="true">→</span></a>
     </div>
     <div class="writing-list">
       {writing.map((post) => (
@@ -196,6 +196,30 @@ const works = sanityProjects.length
     margin-left: auto;
     aspect-ratio: 402 / 528;
     object-fit: cover;
+  }
+
+  .section-heading-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-heading-link:hover {
+    color: var(--text);
+  }
+
+  .section-heading-arrow {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .section-heading-link:hover .section-heading-arrow,
+  .section-heading-link:focus-visible .section-heading-arrow {
+    opacity: 1;
+    transform: translateX(0);
   }
 
   .works-list,
@@ -377,7 +401,7 @@ const works = sanityProjects.length
 
   .playground-browser {
     position: absolute;
-    inset: auto auto -12px calc(50% + 6px);
+    inset: auto auto -40px calc(50% + 6px);
     width: min(91%, 495px);
     aspect-ratio: 495 / 314;
     transform: translate3d(-50%, 0, 0);

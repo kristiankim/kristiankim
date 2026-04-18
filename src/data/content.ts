@@ -1,8 +1,8 @@
 export const home = {
-  intro: "Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.",
-  body: "Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.",
+  intro: "I design products that work and feel good.",
+  body: "Right now I lead design at JPMorgan Chase, working with a team on tools that help businesses manage money at scale. The problems are complex — the goal is to make them feel less so.",
   longBio:
-    "While drawing rectangles and adding text is my primary job, I’m also driven by curiosity and constantly find myself diving into new topics—from AI and photography to video making—always exploring ways to expand my perspective and creativity. Outside of work, I’m a husband, a father of three amazing (and wild) kids, and when I finally get a moment to myself, you’ll either find me playing console games or winding down with a good book on my eReader.",
+    "My job is mostly drawing rectangles and adding text — by keyboard, mouse, or prompt, depending on the day. Outside that, I follow curiosity wherever it goes: AI, photography, video, whatever’s interesting enough to pull me in. At home, I’m a husband and a dad to three amazing (and genuinely chaotic) kids. The rare quiet moment? I’m either holding my PS controller (currently playing <a href=\"https://www.playstation.com/en-us/games/marvels-spider-man-2/\" target=\"_blank\" rel=\"noreferrer\">this game</a> and <a href=\"https://store.playstation.com/en-us/concept/10002363\" target=\"_blank\" rel=\"noreferrer\">this game</a>), or reading something on my <a href=\"https://shop.boox.com/products/go7\" target=\"_blank\" rel=\"noreferrer\">this e-reader</a>.",
 };
 
 export const experiences = [
