@@ -10,6 +10,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="about-copy detail-copy">
       <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
       <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
+      <div class="principles">
+        <h2>My design principles</h2>
+        <dl>
+          <div class="principle">
+            <dt>Simplicity &amp; Intuition</dt>
+            <dd>I strive to create interfaces that feel natural and effortless—where the right elements appear exactly when and where users expect them. When the interface stays out of the way until needed, users can stay focused on what truly matters.</dd>
+          </div>
+          <div class="principle">
+            <dt>Attention to Detail</dt>
+            <dd>Every pixel, typeface, and spacing choice is intentional. I believe in designing with care—from microinteractions to typography—because users notice the polish, even if they can't always articulate why. This quiet craftsmanship builds trust and credibility.</dd>
+          </div>
+          <div class="principle">
+            <dt>Inclusive &amp; Accessible Design</dt>
+            <dd>Great products are usable by everyone. I design with accessibility in mind so that users with different abilities or tools can engage equally. A mouse is just one of many ways to interact with the product.</dd>
+          </div>
+          <div class="principle">
+            <dt>Contextual Beauty &amp; Delight</dt>
+            <dd>Aesthetics still do matter—but not in isolation. I aim for beauty that serves function, enhances clarity, and brings delight that aligns with the product's tone and purpose. When design resonates visually, it becomes more memorable and emotionally engaging.</dd>
+          </div>
+        </dl>
+      </div>
       <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
     </div>
   </section>
@@ -34,6 +55,43 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .about-copy {
     grid-column: 5 / span 4;
     max-width: 402px;
+  }
+
+  .principles {
+    display: grid;
+    gap: 16px;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .principles h2 {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .principles dl {
+    display: grid;
+    gap: 20px;
+    margin: 0;
+  }
+
+  .principle dt {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .principle dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
   }
 
   .about-copy a {
