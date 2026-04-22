@@ -188,7 +188,7 @@ const readableDate = post.publishedAt
   : '';
 
 const headings = post.bodyBlocks
-  .filter((block) => block._type === 'block' && (block.style === 'h2' || block.style === 'h3'))
+  .filter((block) => block._type === 'block' && block.style === 'h2')
   .map((block) => {
     const text = toPlainText(block);
 
@@ -243,9 +243,7 @@ const remainingBodyItems = buildBodyItems(
       <aside class="thought-toc">
         {headings.length ? (
           headings.map((heading) => (
-            <a class={heading.level === 'h3' ? 'sub' : ''} href={`#${heading.id}`}>
-              {heading.text}
-            </a>
+            <a href={`#${heading.id}`}>{heading.text}</a>
           ))
         ) : (
           <span class="toc-empty">No headings yet</span>
@@ -422,19 +420,15 @@ const remainingBodyItems = buildBodyItems(
   .toc-empty {
     color: var(--muted);
     text-decoration: none;
-    font-size: 16px;
-    line-height: 22px;
+    font-size: 13px;
+    line-height: 18px;
   }
 
   .thought-toc a:hover {
     color: var(--text);
   }
 
-  .thought-toc a.sub {
-    padding-left: 16px;
-  }
-
-  .thought-body {
+.thought-body {
     display: grid;
     gap: 24px;
     padding: 24px 0;
