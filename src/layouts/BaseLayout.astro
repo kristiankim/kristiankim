@@ -44,11 +44,14 @@ const navItems = [
       rel="stylesheet"
     />
     <title>{fullTitle}</title>
+    <link rel="icon" type="image/png" href="/favicon-light.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <header id="topnav" class="topnav">
       <div class="site-shell topnav-inner">
-        <a class="brand" href="/">Kristian Kim</a>
+        <a class="brand" href="/"><img src="/images/kk-logo.svg" alt="Kristian Kim" width="32" height="32" /></a>
         <nav class="site-nav" aria-label="Primary">
           {navItems.map((item) => (
             <a href={item.href} class={item.href.startsWith('/') && item.href !== '/' && pathname.startsWith(item.href) ? 'active' : ''}>{item.label}</a>
@@ -289,10 +292,15 @@ const navItems = [
   .brand {
     grid-column: span 4;
     text-decoration: none;
-    font-size: 16px;
-    line-height: 1.3125;
-    font-weight: 700;
+    display: flex;
+    align-items: center;
     white-space: nowrap;
+  }
+
+  .brand img {
+    display: block;
+    width: 32px;
+    height: 32px;
   }
 
   .site-nav {
