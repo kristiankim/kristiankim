@@ -139,7 +139,7 @@ const works = sanityProjects.length
           <div class="playground-card-copy">
             <h2>{item.title}</h2>
             <p>{item.caption}</p>
-            <a class="playground-card-link" href={item.thumb} target="_blank" rel="noreferrer">View</a>
+            <a class="playground-card-link" href={item.url || item.thumb} target="_blank" rel="noreferrer">View</a>
           </div>
           <div class="playground-card-media">
             <div class="playground-browser">

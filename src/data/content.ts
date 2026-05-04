@@ -28,10 +28,10 @@ export const experiences = [
 
 export const playground = [
   {
-    title: 'Squarex landing page',
-    caption:
-      'A playful marketing site concept designed to showcase product value with bold graphics, layered cards, and an upbeat section rhythm.',
-    thumb: '/images/playground/squarex-landing.png',
+    title: 'Sparkquest app',
+    caption: 'A habit-builder app for kids. Parents set the routine, kids check things off.',
+    thumb: '/images/playground/sparkquest-landing.png',
+    url: 'https://www.sparkquest.app',
   },
   {
     title: 'Sparkquest Dashboard page',
