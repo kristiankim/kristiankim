@@ -8,10 +8,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h1>About</h1>
     </div>
     <div class="about-copy detail-copy">
-      <p>Hi, I’m Kristian Kim, a product designer who enjoys crafting intuitive and user-centered experiences.</p>
-      <p>Currently, I lead and collaborate with my team at JPMorgan Chase to design and deliver impactful tools that drive business success at various scales.</p>
+      <img class="about-photo" src="/images/kristian_family_trip.webp" alt="Kristian with family" loading="eager" />
+      <p>My biggest motivation comes home with me every night — three kids who are loud, curious, and completely unforgiving of bad UX. They don’t read instructions. They don’t ask for help. They just expect things to work. I design for them, even when I’m designing for a bank.</p>
       <div class="principles">
-        <h2>My design principles</h2>
+        <h2>How I design</h2>
         <dl>
           <div class="principle">
             <dt>Simplicity &amp; Intuition</dt>
@@ -31,7 +31,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </dl>
       </div>
-      <p>Contact: <a href="mailto:hello@kristiankim.com">hello@kristiankim.com</a></p>
     </div>
   </section>
 </BaseLayout>
@@ -57,21 +56,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     max-width: 402px;
   }
 
+  .about-photo {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 24px;
+  }
+
   .principles {
     display: grid;
     gap: 16px;
     padding: 24px 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
   }
 
   .principles h2 {
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-family: var(--font-serif);
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 400;
+    color: var(--text);
   }
 
   .principles dl {
