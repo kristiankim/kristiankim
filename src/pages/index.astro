@@ -129,32 +129,7 @@ const works = sanityProjects.length
     </div>
   </section>
 
-  <section id="playground" class="section-block">
-    <div class="section-header">
-      <div class="section-heading">Playground</div>
-    </div>
-    <div class="playground-grid">
-      {playground.map((item) => (
-        <article class="playground-card">
-          <div class="playground-card-copy">
-            <h2>{item.title}</h2>
-            <p>{item.caption}</p>
-            <a class="playground-card-link" href={item.url || item.thumb} target="_blank" rel="noreferrer">View</a>
-          </div>
-          <div class="playground-card-media">
-            <div class="playground-browser">
-              <div class="playground-browser-header" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <img src={item.thumb} alt={item.title} loading="lazy" />
-            </div>
-          </div>
-        </article>
-      ))}
-    </div>
-  </section>
+  {/* Playground section — hidden, work in progress */}
 </BaseLayout>
 
 <style>
