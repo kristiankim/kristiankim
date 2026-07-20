@@ -187,14 +187,15 @@ const navItems = [
   }
 
   :root {
-    --page-bg: #faf9f6;
+    --color-white-wild-sand: #faf9f6;
+    --page-bg: var(--color-white-wild-sand);
     --surface: rgba(255, 255, 255, 0.7);
     --surface-strong: rgba(255, 255, 255, 0.86);
     --text: #171717;
     --muted: #626262;
     --line: #e8e8e8;
     --line-strong: #bababa;
-    --container: min(1680px, calc(100vw - 32px));
+    --container: min(960px, calc(100vw - 32px));
     --gutter: clamp(16px, 1.25vw, 24px);
     --font-sans: 'Geist', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --font-mono: 'Geist Mono', 'SFMono-Regular', Consolas, monospace;
@@ -213,9 +214,7 @@ const navItems = [
   body {
     margin: 0;
     min-width: 320px;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.18)),
-      var(--page-bg);
+    background: var(--page-bg);
     color: var(--text);
     font-family: var(--font-sans);
     font-size: 16px;
@@ -280,11 +279,11 @@ const navItems = [
   }
 
   .section-heading {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.5;
     font-weight: 700;
-    color: var(--muted);
+    color: var(--text);
   }
 
   .detail-copy p + p {
@@ -340,9 +339,10 @@ const navItems = [
   }
 
   .site-nav {
-    grid-column: span 4;
+    grid-column: 9 / span 4;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 16px;
   }
 
@@ -360,7 +360,7 @@ const navItems = [
   }
 
   .nav-spacer {
-    grid-column: span 4;
+    display: none;
   }
 
   main {
@@ -450,6 +450,7 @@ const navItems = [
     }
 
     .site-nav {
+      justify-content: flex-start;
       overflow-x: auto;
       padding-bottom: 2px;
     }

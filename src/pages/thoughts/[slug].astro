@@ -352,6 +352,79 @@ const remainingBodyItems = buildBodyItems(
   </article>
 </BaseLayout>
 
+<script>
+  const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.thought-toc a[href^="#"]'));
+  const tocSections = tocLinks
+    .map((link) => {
+      const id = decodeURIComponent(link.hash.slice(1));
+      const heading = document.getElementById(id);
+      return heading ? { id, heading, link } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const setActiveSection = (activeId: string) => {
+    tocSections.forEach(({ id, link }) => {
+      const isActive = id === activeId;
+      link.classList.toggle('is-active', isActive);
+
+      if (isActive) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  let tocFrame = 0;
+  let lockedTocSection = '';
+  let tocUnlockTimer = 0;
+
+  const scheduleTocUnlock = (delay: number) => {
+    window.clearTimeout(tocUnlockTimer);
+    tocUnlockTimer = window.setTimeout(() => {
+      lockedTocSection = '';
+      requestTocUpdate();
+    }, delay);
+  };
+
+  const updateActiveSection = () => {
+    tocFrame = 0;
+    if (!tocSections.length) return;
+
+    if (lockedTocSection) {
+      setActiveSection(lockedTocSection);
+      return;
+    }
+
+    const activationLine = Math.min(window.innerHeight * 0.3, 180);
+    let activeId = tocSections[0].id;
+
+    for (const { id, heading } of tocSections) {
+      if (heading.getBoundingClientRect().top <= activationLine) activeId = id;
+      else break;
+    }
+
+    setActiveSection(activeId);
+  };
+
+  const requestTocUpdate = () => {
+    if (tocFrame) return;
+    tocFrame = window.requestAnimationFrame(updateActiveSection);
+  };
+
+  tocLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      lockedTocSection = decodeURIComponent(link.hash.slice(1));
+      setActiveSection(lockedTocSection);
+      scheduleTocUnlock(1200);
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    if (lockedTocSection) scheduleTocUnlock(180);
+    requestTocUpdate();
+  }, { passive: true });
+  window.addEventListener('resize', requestTocUpdate);
+  requestTocUpdate();
+</script>
+
 <style>
   .thought-article {
     display: grid;
@@ -360,16 +433,19 @@ const remainingBodyItems = buildBodyItems(
 
   .thought-hero {
     display: grid;
-    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 48px;
     align-items: start;
-    min-height: 600px;
   }
 
   .hero-copy {
+    grid-column: 3 / span 8;
     display: grid;
     gap: 40px;
     align-content: start;
+    justify-items: center;
+    text-align: center;
     padding-top: 4px;
   }
 
@@ -381,6 +457,7 @@ const remainingBodyItems = buildBodyItems(
   .hero-meta {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
     color: var(--muted);
     font-size: 14px;
@@ -388,6 +465,7 @@ const remainingBodyItems = buildBodyItems(
   }
 
   .hero-media {
+    grid-column: 1 / -1;
     width: 100%;
     aspect-ratio: 1112 / 626;
     object-fit: cover;
@@ -400,18 +478,19 @@ const remainingBodyItems = buildBodyItems(
 
   .thought-grid {
     display: grid;
-    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
   }
 
   .thought-toc {
+    grid-column: 1 / span 3;
     position: sticky;
     top: 70px;
     display: grid;
     gap: 14px;
     align-content: start;
-    width: 260px;
+    width: 100%;
     padding: 24px 0;
   }
 
@@ -421,13 +500,22 @@ const remainingBodyItems = buildBodyItems(
     text-decoration: none;
     font-size: 13px;
     line-height: 18px;
+    transform-origin: left center;
+    transition: color 160ms ease, transform 160ms ease;
   }
 
-  .thought-toc a:hover {
+  .thought-toc a:hover,
+  .thought-toc a[aria-current='location'] {
     color: var(--text);
   }
 
-.thought-body {
+  .thought-toc a[aria-current='location'] {
+    font-weight: 500;
+    transform: scale(1.08);
+  }
+
+  .thought-body {
+    grid-column: 5 / span 8;
     display: grid;
     gap: 24px;
     padding: 24px 0;
@@ -557,15 +645,6 @@ const remainingBodyItems = buildBodyItems(
   }
 
   @media (max-width: 1120px) {
-    .thought-hero,
-    .thought-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .thought-hero {
-      min-height: 0;
-    }
-
     .hero-copy h1,
     .thought-toc {
       max-width: none;
@@ -579,6 +658,25 @@ const remainingBodyItems = buildBodyItems(
   }
 
   @media (max-width: 720px) {
+    .thought-hero {
+      grid-template-columns: 1fr;
+      row-gap: 32px;
+    }
+
+    .hero-copy,
+    .hero-media {
+      grid-column: 1;
+    }
+
+    .thought-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .thought-toc,
+    .thought-body {
+      grid-column: 1;
+    }
+
     .hero-copy {
       gap: 24px;
     }

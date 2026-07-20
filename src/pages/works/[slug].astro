@@ -346,16 +346,19 @@ const hasTldr = summaryParagraphs.length > 0;
 
   .work-hero {
     display: grid;
-    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 48px;
     align-items: start;
-    min-height: 600px;
   }
 
   .hero-copy {
+    grid-column: 3 / span 8;
     display: grid;
     gap: 40px;
     align-content: start;
+    justify-items: center;
+    text-align: center;
     padding-top: 4px;
   }
 
@@ -367,6 +370,7 @@ const hasTldr = summaryParagraphs.length > 0;
   .hero-meta {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
     align-items: flex-start;
   }
@@ -374,7 +378,9 @@ const hasTldr = summaryParagraphs.length > 0;
   .meta-item {
     display: grid;
     gap: 8px;
+    justify-items: start;
     min-width: 80px;
+    text-align: left;
   }
 
   .meta-label,
@@ -400,6 +406,7 @@ const hasTldr = summaryParagraphs.length > 0;
   }
 
   .hero-media {
+    grid-column: 1 / -1;
     width: 100%;
     height: auto;
     display: block;
@@ -412,12 +419,13 @@ const hasTldr = summaryParagraphs.length > 0;
 
   .article-grid {
     display: grid;
-    grid-template-columns: minmax(0, 544px) minmax(0, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
   }
 
   .article-aside {
+    grid-column: 1 / span 3;
     position: sticky;
     top: 70px;
     display: grid;
@@ -426,6 +434,7 @@ const hasTldr = summaryParagraphs.length > 0;
   }
 
   .article-aside-spacer {
+    grid-column: 1 / span 3;
     min-height: 1px;
   }
 
@@ -457,6 +466,7 @@ const hasTldr = summaryParagraphs.length > 0;
   }
 
   .article-body {
+    grid-column: 5 / span 8;
     display: grid;
     gap: 24px;
     padding: 24px 0;
@@ -568,15 +578,6 @@ const hasTldr = summaryParagraphs.length > 0;
   }
 
   @media (max-width: 1120px) {
-    .work-hero,
-    .article-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .work-hero {
-      min-height: 0;
-    }
-
     .hero-copy h1 {
       max-width: none;
     }
@@ -597,6 +598,26 @@ const hasTldr = summaryParagraphs.length > 0;
   }
 
   @media (max-width: 720px) {
+    .work-hero {
+      grid-template-columns: 1fr;
+      row-gap: 32px;
+    }
+
+    .hero-copy,
+    .hero-media {
+      grid-column: 1;
+    }
+
+    .article-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .article-aside,
+    .article-aside-spacer,
+    .article-body {
+      grid-column: 1;
+    }
+
     .hero-copy {
       gap: 24px;
     }

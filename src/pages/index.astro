@@ -52,19 +52,18 @@ const works = sanityProjects.length
 
 <BaseLayout>
   <section class="home-hero twelve-col">
+    <div class="hero-visual">
+      <img
+        src="/images/kristian-designing.svg"
+        alt="Illustration of Kristian designing at his desk"
+      />
+    </div>
     <div class="hero-intro">
       <h1>{home.intro}</h1>
     </div>
     <div class="hero-body detail-copy">
       <p>{home.body}</p>
       <p set:html={home.longBio} />
-    </div>
-    <div class="hero-visual">
-      <img
-        src="/images/portrait.png"
-        alt="Portrait"
-        loading="lazy"
-      />
     </div>
   </section>
 
@@ -75,9 +74,11 @@ const works = sanityProjects.length
     <div class="works-list">
       {experiences.map((item) => (
         <article class="project-row">
-          <div class="project-company">{item.company}</div>
-          <div class="project-year">
-            <span>{item.period}</span>
+          <div class="project-meta">
+            <div class="project-company">{item.company}</div>
+            <div class="project-year">
+              <span>{item.period}</span>
+            </div>
           </div>
           <div class="project-copy">
             <p class="project-summary">{item.summary}</p>
@@ -134,8 +135,10 @@ const works = sanityProjects.length
 
 <style>
   .home-hero {
-    min-height: min(748px, calc(100vh - 190px));
+    grid-template-rows: auto auto auto;
+    row-gap: 80px;
     align-items: start;
+    padding: 40px 0 24px;
   }
 
   .hero-intro,
@@ -145,31 +148,30 @@ const works = sanityProjects.length
   }
 
   .hero-intro {
-    grid-column: span 4;
-    max-width: 402px;
+    grid-column: 1 / span 7;
   }
 
   .hero-intro h1 {
-    font-size: clamp(2rem, 2.3vw, 2.6rem);
+    font-size: 32px;
     line-height: 1.25;
   }
 
   .hero-body {
-    grid-column: span 4;
-    max-width: 402px;
+    grid-column: 6 / span 7;
   }
 
   .hero-visual {
-    grid-column: span 4;
-    justify-self: end;
-    width: 100%;
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(486px, 100%);
+    background: var(--page-bg);
   }
 
   .hero-visual img {
-    width: min(402px, 100%);
-    margin-left: auto;
-    aspect-ratio: 402 / 528;
-    object-fit: cover;
+    width: 100%;
+    aspect-ratio: 486 / 394;
+    object-fit: contain;
+    background: var(--page-bg);
   }
 
   .section-heading-link {
@@ -205,11 +207,33 @@ const works = sanityProjects.length
   .project-row,
   .writing-row {
     display: grid;
-    grid-template-columns: 260px 260px minmax(0, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 24px;
-    padding: 12px 0;
+    padding: 24px 0;
     border-bottom: 1px solid var(--line);
     align-items: start;
+  }
+
+  .project-meta {
+    grid-column: 1 / span 4;
+    display: grid;
+    gap: 12px;
+  }
+
+  .project-copy {
+    grid-column: 6 / span 7;
+  }
+
+  .writing-date {
+    grid-column: 1 / span 3;
+  }
+
+  .writing-category {
+    grid-column: 4 / span 3;
+  }
+
+  .writing-link {
+    grid-column: 7 / span 6;
   }
 
   .project-row:last-child,
@@ -218,9 +242,20 @@ const works = sanityProjects.length
   }
 
   .project-company,
-  .project-year,
   .writing-date,
   .writing-category {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.2857;
+  }
+
+  .project-company {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    line-height: 1.1667;
+  }
+
+  .project-year {
     color: var(--muted);
     font-size: 14px;
     line-height: 1.2857;
@@ -260,7 +295,7 @@ const works = sanityProjects.length
 
   .selected-work-card {
     display: grid;
-    grid-template-columns: 544px minmax(0, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 24px;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--line-strong);
@@ -273,9 +308,9 @@ const works = sanityProjects.length
   }
 
   .selected-work-copy {
+    grid-column: 1 / span 4;
     display: grid;
     gap: 16px;
-    max-width: 544px;
   }
 
   .selected-work-meta {
@@ -307,6 +342,7 @@ const works = sanityProjects.length
 
   .selected-work-image,
   .selected-work-placeholder {
+    grid-column: 6 / span 7;
     width: 100%;
     min-height: 420px;
     aspect-ratio: 1112 / 696;
@@ -422,7 +458,8 @@ const works = sanityProjects.length
 
   @media (max-width: 980px) {
     .home-hero {
-      min-height: auto;
+      row-gap: 40px;
+      padding-top: 24px;
     }
 
     .hero-intro,
@@ -434,8 +471,8 @@ const works = sanityProjects.length
 
     .hero-visual img {
       width: 100%;
-      max-width: 402px;
-      margin-left: 0;
+      max-width: 486px;
+      margin: 0 auto;
     }
 
     .project-row,
@@ -445,9 +482,22 @@ const works = sanityProjects.length
       gap: 12px;
     }
 
+    .project-meta,
+    .project-copy,
+    .writing-date,
+    .writing-category,
+    .writing-link {
+      grid-column: auto;
+    }
+
     .selected-work-image,
     .selected-work-placeholder {
+      grid-column: auto;
       min-height: 0;
+    }
+
+    .selected-work-copy {
+      grid-column: auto;
     }
 
     .playground-grid {
