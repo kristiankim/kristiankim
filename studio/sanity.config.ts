@@ -8,7 +8,6 @@ export default defineConfig({
   title: 'Kristian Kim CMS',
   projectId: 'm63s8wwp',
   dataset: 'production',
-  basePath: '/studio',
   plugins: [
     structureTool(),
     visionTool(),

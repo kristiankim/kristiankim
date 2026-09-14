@@ -1,0 +1,138 @@
+---
+import type { PlaygroundItem } from '../data/playground';
+interface Props { items: PlaygroundItem[]; id: string; variant?: 'table' | 'preview'; externalControls?: boolean; }
+const { items, id, variant = 'table', externalControls = false } = Astro.props;
+---
+<playground-gallery data-variant={variant} data-gallery-id={id}>
+  {variant === 'table' && items.length > 1 && !externalControls && <div class="gallery-tools"><button class="shuffle" type="button" hidden><span aria-hidden="true">↝</span> Shuffle</button></div>}
+  {variant === 'table' && items.length > 1 && <span class="sr-only" role="status"></span>}
+  <div class="playground-grid" id={`${id}-grid`}>
+    {items.map(item => (
+      <a class="playground-tile" href={item.src} data-slug={item.slug} aria-label={`Open ${item.title}`} aria-haspopup="dialog">
+        <img src={item.thumbnail} alt={item.alt} loading="lazy" decoding="async" />
+        <span class="tile-label"><span>{item.title}</span><span class="media-hint" aria-hidden="true">{item.mediaType === 'video' ? '▶ Play' : '↗ Open'}</span></span>
+        <template>
+          <figure>
+            {item.mediaType === 'video' ? <video src={item.src} poster={item.thumbnail} controls muted loop playsinline preload="none" aria-label={item.alt} /> : <img src={item.src} alt={item.alt} />}
+            <figcaption>
+              <h2 id={`${id}-title-${item.slug}`}>{item.title}</h2>
+              <p>{item.caption}</p>
+              {item.url && <a href={item.url} target="_blank" rel="noreferrer">Visit project ↗</a>}
+            </figcaption>
+          </figure>
+        </template>
+      </a>
+    ))}
+  </div>
+  {items.length === 0 && <p class="empty">New experiments are on their way.</p>}
+  <dialog data-lenis-prevent>
+    <button class="close" type="button" aria-label="Close media viewer">Close <span aria-hidden="true">×</span></button>
+    <div class="viewer-content"></div>
+  </dialog>
+</playground-gallery>
+
+<script>
+  class PlaygroundGallery extends HTMLElement {
+    connectedCallback() {
+      const dialog = this.querySelector('dialog')!;
+      const content = this.querySelector('.viewer-content')!;
+      let trigger: HTMLAnchorElement | null = null;
+      let previousOverflow = '';
+      const externalShuffle = this.dataset.galleryId
+        ? document.querySelector<HTMLButtonElement>(`[data-shuffle-for="${this.dataset.galleryId}"]`)
+        : null;
+      const shuffle = this.querySelector<HTMLButtonElement>('.shuffle') ?? externalShuffle;
+      if (shuffle) {
+        shuffle.hidden = false;
+        shuffle.addEventListener('click', () => {
+          const grid = this.querySelector('.playground-grid')!;
+          const tiles = Array.from(grid.children);
+          const first = tiles[0];
+          for (let i = tiles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+          }
+          if (tiles[0] === first) tiles.push(tiles.shift()!);
+          grid.append(...tiles);
+          this.querySelector('[role="status"]')!.textContent = 'Gallery rearranged. Your saved order is unchanged.';
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            tiles.forEach((tile, i) => tile.animate([{ opacity: .4, translate: '0 12px' }, { opacity: 1, translate: '0 0' }], { duration: 300, delay: i * 35, easing: 'ease-out' }));
+          }
+        });
+      }
+      this.querySelectorAll<HTMLAnchorElement>('.playground-tile').forEach(tile => {
+        tile.addEventListener('click', event => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          trigger = tile;
+          content.replaceChildren(tile.querySelector('template')!.content.cloneNode(true));
+          dialog.setAttribute('aria-labelledby', content.querySelector('h2')!.id);
+          previousOverflow = document.documentElement.style.overflow;
+          document.documentElement.style.overflow = 'hidden';
+          dialog.showModal();
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) content.querySelector('video')?.play().catch(() => {});
+        });
+      });
+      this.querySelector('.close')!.addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+      dialog.addEventListener('close', () => {
+        content.querySelector('video')?.pause();
+        content.replaceChildren();
+        document.documentElement.style.overflow = previousOverflow;
+        trigger?.focus({ preventScroll: true });
+      });
+    }
+  }
+  if (!customElements.get('playground-gallery')) customElements.define('playground-gallery', PlaygroundGallery);
+</script>
+
+<style>
+  playground-gallery { display: block; }
+  .gallery-tools { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-bottom: 48px; color: var(--muted); font-size: 13px; }
+  .shuffle { background: transparent; border: 1px solid var(--line-strong); border-radius: 24px; padding: 10px 16px; min-height: 44px; font: inherit; color: var(--text); cursor: pointer; }
+  .shuffle:hover { background: #e5eddf; }
+  .shuffle span { display: inline-block; margin-right: 6px; font-size: 20px; vertical-align: middle; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .playground-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 72px 24px; align-items: start; padding: 12px 12px 32px; }
+  .playground-tile { --angle: -2deg; position: relative; display: block; min-width: 0; grid-column: 1 / span 7; padding: 10px 10px 0; border-radius: 4px; background: #fff; text-decoration: none; transform: rotate(var(--angle)); box-shadow: 0 4px 8px #17171714; transition: transform 320ms cubic-bezier(.22,1,.36,1), box-shadow 320ms; }
+  .playground-tile:nth-child(4n + 2) { --angle: 3deg; grid-column: 9 / span 4; margin-top: 104px; background: #e9eedf; }
+  .playground-tile:nth-child(4n + 3) { --angle: -3deg; grid-column: 2 / span 4; background: #ece8f2; }
+  .playground-tile:nth-child(4n + 4) { --angle: 1.5deg; grid-column: 7 / span 6; margin-top: 64px; }
+  .playground-tile > img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
+  .playground-tile:nth-child(4n + 2) > img, .playground-tile:nth-child(4n + 3) > img { aspect-ratio: 1; }
+  .playground-tile:hover, .playground-tile:focus-visible { z-index: 1; transform: translateY(-8px) rotate(0deg); box-shadow: 0 8px 8px #1717171a; }
+  .playground-tile:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
+  .tile-label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 15px 5px 17px; font-size: 13px; line-height: 1.4; }
+  .media-hint { flex-shrink: 0; color: #4b5847; font-size: 11px; }
+  [data-variant="preview"] .playground-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 36px 12px 48px; }
+  [data-variant="preview"] .playground-tile { grid-column: auto; margin: 0 -8px; --angle: -6deg; }
+  [data-variant="preview"] .playground-tile:nth-child(2) { --angle: 4deg; margin-top: 36px; }
+  [data-variant="preview"] .playground-tile:nth-child(3) { --angle: -3deg; margin-top: 8px; }
+  [data-variant="preview"] .playground-tile > img { aspect-ratio: 4 / 3; }
+  dialog { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 72px 24px 32px; border: 0; background: transparent; color: var(--text); overflow-y: auto; }
+  dialog[open] { display: flex; align-items: safe center; justify-content: center; }
+  dialog::backdrop { background: rgba(250,249,246,.75); backdrop-filter: blur(22px); }
+  .close { position: fixed; z-index: 1; right: 24px; top: 20px; min-height: 44px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 24px; background: var(--page-bg); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }
+  .close span { margin-left: 12px; font-size: 20px; }
+  .viewer-content { width: min(100%, 1040px); }
+  .viewer-content :global(figure) { margin: 0; }
+  .viewer-content :global(figure > img), .viewer-content :global(video) { display: block; width: auto; max-width: 100%; height: auto; max-height: 70dvh; margin: 0 auto; object-fit: contain; border-radius: 6px; }
+  .viewer-content :global(figcaption) { max-width: 600px; margin: 24px auto 0; text-align: center; }
+  .viewer-content :global(h2) { font: 500 16px/1.4 var(--font-sans); margin: 0 0 8px; }
+  .viewer-content :global(p) { font-size: 14px; line-height: 1.6; white-space: pre-line; }
+  .viewer-content :global(figcaption a) { display: inline-block; margin-top: 14px; font-size: 14px; text-underline-offset: 4px; }
+  .empty { padding: 64px 0; }
+  @media (max-width: 680px) {
+    .gallery-tools { align-items: start; margin-bottom: 32px; }
+    .shuffle { white-space: nowrap; }
+    .playground-grid { gap: 36px 16px; padding-inline: 10px; }
+    .playground-tile:nth-child(n) { grid-column: 1 / -1; width: 92%; margin: 0; --angle: -2deg; }
+    .playground-tile:nth-child(even) { justify-self: end; --angle: 2deg; width: 84%; }
+    .playground-tile:nth-child(n) > img { aspect-ratio: 4 / 3; }
+    [data-variant="preview"] .playground-grid { display: flex; overflow-x: auto; gap: 18px; padding: 24px 12px 32px; scroll-snap-type: x mandatory; }
+    [data-variant="preview"] .playground-tile:nth-child(n) { flex: 0 0 78%; width: 78%; margin: 8px 0; scroll-snap-align: center; }
+    [data-variant="preview"] .playground-tile:nth-child(2) { margin-top: 24px; }
+    dialog { padding: 80px 16px 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .playground-tile { transition: none; } .playground-tile:hover, .playground-tile:focus-visible { transform: rotate(var(--angle)); } }
+</style>

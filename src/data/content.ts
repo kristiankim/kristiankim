@@ -28,24 +28,28 @@ export const experiences = [
 
 export const playground = [
   {
+    slug: 'sparkquest-app',
     title: 'Sparkquest app',
     caption: 'A habit-builder app for kids. Parents set the routine, kids check things off.',
     thumb: '/images/playground/sparkquest-landing.png',
     url: 'https://www.sparkquest.app',
   },
   {
+    slug: 'sparkquest-dashboard',
     title: 'Sparkquest Dashboard page',
     caption:
       'A dashboard exploration focused on information density, approachable visual hierarchy, and quick scanning for parents and operators.',
     thumb: '/images/playground/sparkquest-dashboard.png',
   },
   {
+    slug: 'sparkquest-tasks',
     title: 'Sparkquest Task page',
     caption:
       'A task management concept designed to keep assignments and progress readable through lightweight cards and strong contrast.',
     thumb: '/images/playground/sparkquest-task.png',
   },
   {
+    slug: 'squarex-landing',
     title: 'Squarex landing page',
     caption:
       'A second landing page variation exploring cleaner chart-led storytelling and a sharper editorial rhythm.',
