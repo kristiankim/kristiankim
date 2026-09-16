@@ -42,13 +42,6 @@ export const playground = [
     thumb: '/images/playground/sparkquest-dashboard.png',
   },
   {
-    slug: 'sparkquest-tasks',
-    title: 'Sparkquest Task page',
-    caption:
-      'A task management concept designed to keep assignments and progress readable through lightweight cards and strong contrast.',
-    thumb: '/images/playground/sparkquest-task.png',
-  },
-  {
     slug: 'squarex-landing',
     title: 'Squarex landing page',
     caption:
