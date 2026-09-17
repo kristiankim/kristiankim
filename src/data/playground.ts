@@ -16,6 +16,17 @@ export type PlaygroundItem = {
 // For videos, src is an MP4 and thumbnail is its poster image.
 export const playgroundItems: PlaygroundItem[] = [
   {
+    slug: 'hold-to-delete',
+    title: 'Hold to delete',
+    caption:
+      'A press-and-hold confirmation makes a destructive action feel intentional, using visible progress before the deletion is committed.',
+    publishedAt: '2026-09-17',
+    mediaType: 'video',
+    src: '/videos/hold-to-delete.mp4',
+    thumbnail: '/images/playground/hold-to-delete-cover.png',
+    alt: 'Hold-to-delete confirmation interaction for permanently deleting a file',
+  },
+  {
     slug: 'send-a-payment-form',
     title: 'Send a payment form',
     caption:
