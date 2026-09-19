@@ -6,12 +6,12 @@ The `/playground` page and the three latest homepage uploads share one gallery a
 
 ### Maintain through Codex (default)
 
-Edit `src/data/playground.ts`. Existing image entries are imported from `src/data/content.ts`; new entries can be added directly to `playgroundItems`. Put media in `public/images/playground/` or `public/remotion/` and use a path starting with `/`. Set `publishedAt` to control newest-first ordering (the seeded dates are display-order defaults). A video needs an MP4/WebM `src` and an image `thumbnail`. Future-dated entries stay hidden.
+Edit `src/data/playground.ts`. Existing image entries are imported from `src/data/content.ts`; new entries can be added directly to `playgroundItems`. Put media in `public/images/playground/`, `public/videos/`, or `public/playground/demos/` and use a path starting with `/`. Set `publishedAt` to control newest-first ordering (the seeded dates are display-order defaults). A video needs an MP4/WebM `src` and an image `thumbnail`. An interactive entry needs a self-contained demo path as `src` plus a cover image as `thumbnail`; it opens in a sandboxed iframe. Future-dated entries stay hidden.
 
 ### Maintain through Sanity
 
 1. Run `npm run studio` and open **Playground**.
-2. Create entries with a unique slug, title, caption, date, media description, and image or video. Videos require a poster image. Publish each entry.
+2. Create entries with a unique slug, title, caption, date, media description, and image, video, or interactive demo. Videos and interactive demos require a poster image; interactive demos also need their deployed path or HTTPS URL. Publish each entry.
 3. Set `PLAYGROUND_SOURCE=sanity` in the local `.env` and in the deployment environment, then restart/redeploy the site. The existing Sanity project and dataset are reused.
 4. Deploy the updated Studio with `npm run studio:deploy` when you want the hosted editor to expose the new schema.
 

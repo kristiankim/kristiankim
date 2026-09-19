@@ -5,7 +5,7 @@ export type PlaygroundItem = {
   title: string;
   caption: string;
   publishedAt: string;
-  mediaType: 'image' | 'video';
+  mediaType: 'image' | 'video' | 'interactive';
   src: string;
   thumbnail: string;
   alt: string;
@@ -21,9 +21,9 @@ export const playgroundItems: PlaygroundItem[] = [
     caption:
       'A press-and-hold confirmation makes a destructive action feel intentional, using visible progress before the deletion is committed.',
     publishedAt: '2026-09-17',
-    mediaType: 'video',
-    src: '/videos/hold-to-delete.mp4',
-    thumbnail: '/images/playground/hold-to-delete-cover.png',
+    mediaType: 'interactive',
+    src: '/playground/demos/hold-to-delete/index.html',
+    thumbnail: '/images/playground/hold-to-delete-cover.webp',
     alt: 'Hold-to-delete confirmation interaction for permanently deleting a file',
   },
   {
@@ -32,8 +32,8 @@ export const playgroundItems: PlaygroundItem[] = [
     caption:
       'A focused payment flow that brings the recipient, funding account, delivery method, amount, and schedule into one clear form.',
     publishedAt: '2026-09-15',
-    mediaType: 'image',
-    src: '/images/playground/send-a-payment-form.png',
+    mediaType: 'video',
+    src: '/videos/payment-autofill.mp4',
     thumbnail: '/images/playground/send-a-payment-form.png',
     alt: 'Send a payment form with recipient, account, payment method, amount, and schedule fields',
   },

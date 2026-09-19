@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delete file — Hold to confirm</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #25232c;
+      font-synthesis: none;
+      --radius-window: 16px;
+      --radius-control: 8px;
+      --radius-file: 10px;
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+    }
+    body { position: relative; isolation: isolate; overflow: hidden; margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 20px; background: #eef1f7; }
+    body::before { content: ""; position: fixed; z-index: 0; inset: -12%; background: radial-gradient(ellipse 58% 48% at 7% 42%, #ffd700 0%, #f9bf08 34%, rgba(247, 166, 28, .84) 48%, transparent 68%), radial-gradient(ellipse 52% 48% at 94% 5%, #55a8f8 0%, #79b6f5 40%, rgba(162, 195, 244, .72) 58%, transparent 76%), radial-gradient(ellipse 46% 36% at 57% 51%, #f6a5bb 0%, rgba(239, 160, 192, .78) 43%, transparent 74%), radial-gradient(ellipse 55% 42% at 58% 104%, #d9da16 0%, #c1d74f 30%, rgba(169, 207, 171, .76) 58%, transparent 78%), radial-gradient(ellipse 42% 44% at -3% 70%, #ed8b00 0%, #f3a20d 37%, transparent 72%), radial-gradient(ellipse 74% 42% at 55% 43%, transparent 45%, rgba(255, 255, 255, .9) 53%, rgba(247, 240, 252, .62) 62%, transparent 70%), linear-gradient(135deg, #f6edff 0%, #f9f5fa 44%, #dcecff 100%); filter: blur(22px) saturate(118%); transform: scale(1.08); }
+    body::after { content: ""; position: fixed; z-index: 1; inset: 0; pointer-events: none; background-image: linear-gradient(90deg, rgba(255, 255, 255, .18) 1px, transparent 1px), linear-gradient(rgba(255, 255, 255, .15) 1px, transparent 1px), linear-gradient(90deg, rgba(42, 53, 84, .055) 1px, transparent 2px), linear-gradient(rgba(42, 53, 84, .045) 1px, transparent 2px), radial-gradient(circle, rgba(255, 255, 255, .36) 0 .7px, transparent .9px); background-size: 5px 5px, 5px 5px, 11px 11px, 11px 11px, 3px 3px; mix-blend-mode: soft-light; opacity: .88; }
+    .shell { position: relative; z-index: 2; width: min(432px, 100%); }
+    .window { width: 100%; padding: 28px; background: #fff; border-radius: var(--radius-window); box-shadow: 0 14px 32px -16px #40325152; }
+    .badge { position: relative; width: 32px; height: 32px; color: #bd4b42; margin-bottom: 8px; transition: color .2s var(--ease-out); }
+    .badge svg { position: absolute; inset: 2px; width: 28px; height: 28px; transition: opacity .2s var(--ease-out), transform .2s var(--ease-out); }
+    .icon-trash { opacity: 1; transform: scale(1) rotate(0); }
+    .icon-check { opacity: 0; transform: scale(.65) rotate(-10deg); }
+    h1 { margin: 0 0 14px; font-size: 22px; line-height: 28px; letter-spacing: -.02em; font-weight: 650; text-wrap: balance; }
+    .description { margin: 0 0 16px; color: #69636e; font-size: 14px; line-height: 20px; text-wrap: pretty; }
+    .file { display: flex; align-items: center; gap: 12px; min-height: 64px; margin: 0 0 14px; padding: 12px 14px; border: 1px solid #ebe8ed; border-radius: var(--radius-file); background: #f7f6f8; transition: opacity .18s var(--ease-out); }
+    .file svg { width: 28px; height: 32px; flex-shrink: 0; }
+    .file-copy { min-width: 0; }
+    .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; font-weight: 600; color: #37323e; }
+    .file-detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: #6d6672; }
+    .buttons { display: flex; gap: 10px; }
+    button { font: inherit; font-size: 13px; line-height: 18px; font-weight: 600; height: 44px; border-radius: var(--radius-control); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible { outline: 3px solid #7564a0; outline-offset: 3px; }
+    button:disabled { cursor: default; }
+    .cancel { width: 112px; flex-shrink: 0; background: #fff; color: #554f5c; border: 1px solid #dfdbe2; transition: background .15s var(--ease-out); }
+    .cancel:hover { background: #f7f6f8; }
+    .hold { flex: 1; position: relative; overflow: hidden; isolation: isolate; background: #c83a36; color: #fff; border: 1px solid #ad2e2a; user-select: none; -webkit-user-select: none; touch-action: none; transition: background .15s var(--ease-out); }
+    .hold:hover { background: #bd332f; }
+    .fill { position: absolute; inset: 0; z-index: -1; background: #841f1d; transform: scaleX(0); transform-origin: left; will-change: transform; }
+    .window[data-state="deleted"] .badge { color: #337458; }
+    .window[data-state="deleted"] .icon-trash { opacity: 0; transform: scale(.65) rotate(10deg); }
+    .window[data-state="deleted"] .icon-check { opacity: 1; transform: scale(1) rotate(0); }
+    .window[data-state="deleted"] .file { opacity: .58; }
+    .window[data-state="deleted"] .hold { opacity: .72; }
+    .retry { position: absolute; top: calc(100% + 12px); left: 50%; min-width: 104px; padding: 0 16px; border: 0; background: #fff; color: #514a58; box-shadow: 0 8px 18px -12px #4032518c; opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, -6px); transition: color .15s var(--ease-out), opacity .2s var(--ease-out), transform .2s var(--ease-out), visibility 0s linear .2s; }
+    .retry.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
+    .retry.is-visible:hover { color: #25232c; transform: translate(-50%, -1px); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (max-width: 420px) { body { padding: 16px; } .window { padding: 24px 20px; } .cancel { width: 96px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <main class="window" data-state="idle" aria-labelledby="title" aria-describedby="description">
+      <div class="badge" aria-hidden="true">
+        <svg class="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg>
+        <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+      </div>
+      <h1 id="title">Delete this file?</h1>
+      <div class="file">
+        <svg aria-hidden="true" viewBox="0 0 32 36" fill="none"><path d="M7 2h12l7 7v24H7V2Z" fill="white" stroke="#B6AEBE" stroke-width="1.4" stroke-linejoin="round"/><path d="M19 2v8h7M11 17h10M11 22h10M11 27h6" stroke="#8D8496" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <div class="file-copy"><div class="file-name">draft_v2.md</div><div class="file-detail">Quarterly Product Strategy</div></div>
+      </div>
+      <p class="description" id="description">Once deleted, this file can’t be restored.</p>
+      <div class="buttons">
+        <button class="cancel" type="button">Cancel</button>
+        <button class="hold" type="button" aria-describedby="description"><span class="fill" aria-hidden="true"></span><span id="button-label">Hold to delete</span></button>
+      </div>
+      <p class="sr-only" role="status" aria-live="polite" id="status"></p>
+    </main>
+    <button class="retry" id="retry" type="button">Try again</button>
+  </div>
+  <script>
+    // Self-contained interaction demo. No filesystem access or actual deletion.
+    const $ = selector => document.querySelector(selector);
+    const panel = $('.window'), hold = $('.hold'), cancel = $('.cancel');
+    const fill = $('.fill'), label = $('#button-label');
+    const status = $('#status'), retry = $('#retry');
+    const DURATION = 1500, DRAIN = 300;
+    let state = 'idle', progress = 0, frame = 0, startedAt = 0, input = null;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function renderProgress(value) { progress = value; fill.style.transform = `scaleX(${value})`; }
+    function setState(value) { state = value; panel.dataset.state = value; }
+    function reset() {
+      cancelAnimationFrame(frame); input = null; renderProgress(0); setState('idle');
+      label.textContent = 'Hold to delete';
+      hold.disabled = false;
+      cancel.disabled = false;
+      cancel.textContent = 'Cancel';
+      retry.classList.remove('is-visible');
+      status.textContent = 'Ready to delete.';
+      hold.focus({ preventScroll: true });
+    }
+    function finish() {
+      input = null; setState('deleted'); renderProgress(1);
+      label.textContent = 'Deleted';
+      hold.disabled = true;
+      cancel.textContent = 'Close';
+      retry.classList.add('is-visible');
+      status.textContent = 'File deleted.';
+      retry.focus({ preventScroll: true });
+    }
+    function tick(now) {
+      if (state !== 'holding') return;
+      const value = Math.min((now - startedAt) / DURATION, 1);
+      renderProgress(value);
+      if (value >= 1) { finish(); return; }
+      if (value >= .8 && label.textContent !== 'Release to cancel') {
+        label.textContent = 'Release to cancel'; status.textContent = 'Release to cancel';
+      }
+      frame = requestAnimationFrame(tick);
+    }
+    function begin(source) {
+      if (state !== 'idle' && state !== 'draining') return;
+      retry.classList.remove('is-visible');
+      cancelAnimationFrame(frame); renderProgress(0); input = source;
+      setState('holding'); startedAt = performance.now(); label.textContent = 'Holding…';
+      status.textContent = 'Holding to delete';
+      frame = requestAnimationFrame(tick);
+    }
+    function release() {
+      if (state !== 'holding') return;
+      cancelAnimationFrame(frame); input = null; setState('draining');
+      const from = progress, start = performance.now();
+      label.textContent = 'Hold to delete';
+      status.textContent = 'Deletion cancelled. Your file is safe.';
+      function drain(now) {
+        const fraction = reducedMotion ? 1 : Math.min((now - start) / DRAIN, 1);
+        renderProgress(from * Math.pow(1 - fraction, 2));
+        if (fraction < 1) frame = requestAnimationFrame(drain);
+        else setState('idle');
+      }
+      frame = requestAnimationFrame(drain);
+    }
+    function keepFile() {
+      cancelAnimationFrame(frame); input = null; renderProgress(0); setState('idle');
+      label.textContent = 'Hold to delete';
+      status.textContent = 'Deletion cancelled. Your file is safe.';
+    }
+    hold.addEventListener('pointerdown', event => {
+      if (event.button !== 0 || !event.isPrimary) return;
+      if (state === 'deleted') return;
+      event.preventDefault(); hold.focus(); hold.setPointerCapture(event.pointerId); begin('pointer');
+    });
+    hold.addEventListener('pointermove', event => {
+      if (input !== 'pointer') return;
+      const r = hold.getBoundingClientRect();
+      if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) release();
+    });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      hold.addEventListener(type, () => { if (input === 'pointer') release(); });
+    }
+    hold.addEventListener('keydown', event => {
+      if (event.key !== ' ' && event.key !== 'Enter') return;
+      event.preventDefault();
+      if (event.repeat) return;
+      if (state === 'deleted') return;
+      begin('keyboard');
+    });
+    hold.addEventListener('keyup', event => {
+      if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); if (input === 'keyboard') release(); }
+    });
+    hold.addEventListener('contextmenu', event => event.preventDefault());
+    hold.addEventListener('blur', release);
+    window.addEventListener('blur', release);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && state !== 'deleted') { if (state === 'holding') release(); else keepFile(); } });
+    cancel.addEventListener('click', () => { if (state === 'deleted') reset(); else keepFile(); });
+    retry.addEventListener('click', reset);
+  </script>
+</body>
+</html>
