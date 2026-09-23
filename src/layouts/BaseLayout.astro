@@ -464,27 +464,23 @@ const navItems = [
 
   @media (max-width: 980px) {
     .topnav-inner {
-      grid-template-columns: 1fr;
-      gap: 6px;
-      padding: 10px 0;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 16px;
+      min-height: 52px;
+      padding: 4px 0;
     }
 
-    .brand,
-    .site-nav,
-    .nav-spacer {
-      grid-column: auto;
-    }
+    .brand { grid-column: 1; }
 
     .site-nav {
-      justify-content: flex-start;
+      grid-column: 2;
+      min-width: 0;
+      justify-content: flex-end;
       overflow-x: auto;
-      padding-bottom: 2px;
+      scrollbar-width: none;
     }
 
-    .twelve-col {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
+    .site-nav::-webkit-scrollbar { display: none; }
 
     .section-block {
       margin-top: 44px;
@@ -496,6 +492,14 @@ const navItems = [
 
     .site-footer {
       padding-bottom: 20px;
+    }
+
+  }
+
+  @media (max-width: 520px) {
+    .twelve-col {
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
 
     .site-footer-inner {
@@ -510,5 +514,11 @@ const navItems = [
       gap: 12px;
       text-align: left;
     }
+  }
+
+  @media (max-width: 420px) {
+    .topnav-inner { gap: 12px; }
+    .site-nav { gap: 10px; }
+    .site-nav a { font-size: 13px; }
   }
 </style>

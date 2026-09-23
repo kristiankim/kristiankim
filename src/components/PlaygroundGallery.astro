@@ -150,17 +150,28 @@ const { items, id, variant = 'table', externalControls = false } = Astro.props;
   .viewer-content :global(p) { font-size: 14px; line-height: 1.6; white-space: pre-line; }
   .viewer-content :global(figcaption a) { display: inline-block; margin-top: 14px; font-size: 14px; text-underline-offset: 4px; }
   .empty { padding: 64px 0; }
-  @media (max-width: 680px) {
+  @media (max-width: 820px) {
     .gallery-tools { align-items: start; margin-bottom: 32px; }
     .shuffle { white-space: nowrap; }
-    .playground-grid { gap: 36px 16px; padding-inline: 10px; }
-    .playground-tile:nth-child(n) { grid-column: 1 / -1; width: 92%; margin: 0; --angle: -2deg; }
-    .playground-tile:nth-child(even) { justify-self: end; --angle: 2deg; width: 84%; }
+    .playground-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 18px; padding-inline: 8px; }
+    [data-variant="preview"] .playground-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 18px; }
+    .playground-tile:nth-child(n) { grid-column: auto; width: 100%; margin: 0; }
+    .playground-tile:nth-child(4n + 1) { --angle: -2deg; }
+    .playground-tile:nth-child(4n + 2) { --angle: 2.5deg; width: 88%; justify-self: end; margin-top: 48px; }
+    .playground-tile:nth-child(4n + 3) { --angle: -2.5deg; width: 86%; justify-self: center; }
+    .playground-tile:nth-child(4n + 4) { --angle: 1.5deg; margin-top: 28px; }
+  }
+  @media (max-width: 680px) {
+    dialog { padding: 80px 16px 28px; }
+  }
+  @media (max-width: 520px) {
+    .playground-grid { grid-template-columns: 1fr; gap: 36px; padding-inline: 10px; }
+    .playground-tile:nth-child(n) { grid-column: 1; width: 92%; margin: 0; justify-self: start; --angle: -2deg; }
+    .playground-tile:nth-child(even) { justify-self: end; width: 84%; --angle: 2deg; }
     .playground-tile:nth-child(n) > img { aspect-ratio: 4 / 3; }
     [data-variant="preview"] .playground-grid { display: flex; overflow-x: auto; gap: 18px; padding: 24px 12px 32px; scroll-snap-type: x mandatory; }
     [data-variant="preview"] .playground-tile:nth-child(n) { flex: 0 0 78%; width: 78%; margin: 8px 0; scroll-snap-align: center; }
     [data-variant="preview"] .playground-tile:nth-child(2) { margin-top: 24px; }
-    dialog { padding: 80px 16px 28px; }
   }
   @keyframes loading-breathe { 0%, 100% { opacity: .35; transform: scale(.86); } 50% { opacity: 1; transform: scale(1); } }
   @media (prefers-reduced-motion: reduce) { .playground-tile, .viewer-content :global(iframe), .viewer-content :global(.demo-loading) { transition: none; } .playground-tile:hover, .playground-tile:focus-visible { transform: rotate(var(--angle)); } .viewer-content :global(.loading-dot) { animation: none; } }
