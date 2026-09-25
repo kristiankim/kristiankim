@@ -16,6 +16,17 @@ export type PlaygroundItem = {
 // For videos, src is an MP4 and thumbnail is its poster image.
 export const playgroundItems: PlaygroundItem[] = [
   {
+    slug: 'italian-riviera-cards',
+    title: 'Italian Riviera cards',
+    caption:
+      'An expanding card interaction for exploring the Italian Riviera, inspired by the customer stories on supabase.com.',
+    publishedAt: '2026-09-24',
+    mediaType: 'interactive',
+    src: '/playground/demos/italian-riviera-cards/index.html',
+    thumbnail: '/images/playground/italian-riviera-cards.jpg',
+    alt: 'Expandable destination cards showing photographs of towns along the Italian Riviera',
+  },
+  {
     slug: 'hold-to-delete',
     title: 'Hold to delete',
     caption:

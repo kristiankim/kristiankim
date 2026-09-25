@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1b1b1b" />
+    <title>Places along the Italian Riviera</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="destinations" aria-labelledby="section-title">
+        <div class="section-heading">
+          <h1 id="section-title"><span>Five extraordinary places</span><br />on the Italian Riviera</h1>
+          <a class="all-places" href="#places">Explore the coast <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <div class="cards" id="places" aria-label="Italian Riviera destinations">
+          <button class="place-card" type="button" aria-expanded="false" aria-label="Explore Portofino" style="--photo: url('images/portofino.jpg')">
+            <span class="place-card__photo" aria-hidden="true"></span>
+            <span class="place-card__shade" aria-hidden="true"></span>
+            <span class="place-card__closed"><span class="place-card__name-vertical">Portofino</span></span>
+            <span class="place-card__open"><span class="place-card__eyebrow">01 / THE HARBOR</span><span class="place-card__title">Portofino</span><span class="place-card__description">A tiny harbor of painted houses, quiet coves, and afternoons that take their time.</span><span class="place-card__more">Discover Portofino <span aria-hidden="true">↗</span></span></span>
+          </button>
+
+          <button class="place-card" type="button" aria-expanded="false" aria-label="Explore Sestri Levante" style="--photo: url('images/sestri-levante.jpg')">
+            <span class="place-card__photo" aria-hidden="true"></span>
+            <span class="place-card__shade" aria-hidden="true"></span>
+            <span class="place-card__closed"><span class="place-card__name-vertical">Sestri Levante</span></span>
+            <span class="place-card__open"><span class="place-card__eyebrow">02 / THE BAY</span><span class="place-card__title">Sestri Levante</span><span class="place-card__description">Two bays, one slender peninsula, and a shoreline made for slow mornings.</span><span class="place-card__more">Discover Sestri Levante <span aria-hidden="true">↗</span></span></span>
+          </button>
+
+          <button class="place-card" type="button" aria-expanded="false" aria-label="Explore Rapallo" style="--photo: url('images/rapallo.jpg')">
+            <span class="place-card__photo" aria-hidden="true"></span>
+            <span class="place-card__shade" aria-hidden="true"></span>
+            <span class="place-card__closed"><span class="place-card__name-vertical">Rapallo</span></span>
+            <span class="place-card__open"><span class="place-card__eyebrow">03 / THE PROMENADE</span><span class="place-card__title">Rapallo</span><span class="place-card__description">A palm-lined waterfront where evening walks end with a view of the sea.</span><span class="place-card__more">Discover Rapallo <span aria-hidden="true">↗</span></span></span>
+          </button>
+
+          <button class="place-card" type="button" aria-expanded="false" aria-label="Explore Santa Margherita Ligure" style="--photo: url('images/santa-margherita.jpg')">
+            <span class="place-card__photo" aria-hidden="true"></span>
+            <span class="place-card__shade" aria-hidden="true"></span>
+            <span class="place-card__closed"><span class="place-card__name-vertical">Santa Margherita Ligure</span></span>
+            <span class="place-card__open"><span class="place-card__eyebrow">04 / THE COAST</span><span class="place-card__title">Santa Margherita Ligure</span><span class="place-card__description">Elegant seaside streets, little fishing boats, and the gateway to the headland.</span><span class="place-card__more">Discover Santa Margherita <span aria-hidden="true">↗</span></span></span>
+          </button>
+
+          <button class="place-card is-active" type="button" aria-expanded="true" aria-label="Explore Camogli" style="--photo: url('images/camogli.jpg')">
+            <span class="place-card__photo" aria-hidden="true"></span>
+            <span class="place-card__shade" aria-hidden="true"></span>
+            <span class="place-card__closed"><span class="place-card__name-vertical">Camogli</span></span>
+            <span class="place-card__open"><span class="place-card__eyebrow">05 / THE VILLAGE</span><span class="place-card__title">Camogli</span><span class="place-card__description">Pastel houses meet the deep blue sea in this timeless fishing village.</span><span class="place-card__more">Discover Camogli <span aria-hidden="true">↗</span></span></span>
+          </button>
+        </div>
+        <p class="hint">Select a place to explore <span aria-hidden="true">↗</span></p>
+      </section>
+    </main>
+  </body>
+</html>
