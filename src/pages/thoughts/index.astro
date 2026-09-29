@@ -16,10 +16,10 @@ const thoughts = sanityPosts.length
 ---
 
 <BaseLayout title="Writings">
-  <section class="section-block">
-    <div class="section-header">
-      <div class="section-heading">Writings</div>
-    </div>
+  <section class="listing-page">
+    <header class="page-header">
+      <h1>Writings</h1>
+    </header>
 
     {!isSanityConfigured && <p class="notice">Using local fallback content. Connect Sanity env vars to load CMS content.</p>}
 
@@ -36,6 +36,20 @@ const thoughts = sanityPosts.length
 </BaseLayout>
 
 <style>
+  .listing-page {
+    padding: 64px 0 100px;
+  }
+
+  .page-header {
+    margin-bottom: 72px;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: clamp(48px, 7vw, 80px);
+    line-height: 1.1;
+  }
+
   .notice {
     margin-bottom: 16px;
   }
@@ -92,6 +106,18 @@ const thoughts = sanityPosts.length
   }
 
   @media (max-width: 520px) {
+    .listing-page {
+      padding-top: 32px;
+    }
+
+    .page-header {
+      margin-bottom: 52px;
+    }
+
+    .page-header h1 {
+      font-size: 40px;
+    }
+
     .item {
       grid-template-columns: 1fr;
       gap: 8px;

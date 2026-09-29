@@ -4,9 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="About">
   <section class="about-page twelve-col">
-    <div class="about-title">
+    <header class="about-title page-header">
       <h1>About</h1>
-    </div>
+    </header>
     <div class="about-copy detail-copy">
       <img class="about-photo" src="/images/kristian_family_trip.webp" alt="Kristian with family" loading="eager" />
       <p>My biggest motivation comes home with me every night — three kids who are loud, curious, and completely unforgiving of bad UX. They don’t read instructions. They don’t ask for help. They just expect things to work. I design for them, even when I’m designing for a bank.</p>
@@ -39,16 +39,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .about-page {
     min-height: 420px;
     align-items: start;
+    padding: 64px 0 100px;
+    row-gap: 0;
   }
 
   .about-title {
-    grid-column: span 4;
-    max-width: 402px;
+    grid-column: 1 / -1;
+    margin-bottom: 72px;
   }
 
   .about-title h1 {
-    font-size: clamp(2rem, 2.3vw, 2.6rem);
-    line-height: 1.25;
+    margin: 0;
+    font-size: clamp(48px, 7vw, 80px);
+    line-height: 1.1;
   }
 
   .about-copy {
@@ -71,7 +74,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .principles h2 {
     font-family: var(--font-serif);
     font-size: 24px;
-    line-height: 1.25;
+    line-height: 28px;
     font-weight: 400;
     color: var(--text);
   }
@@ -91,8 +94,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .principle dd {
     margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.375;
     color: var(--muted);
   }
 
@@ -107,6 +110,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   @media (max-width: 520px) {
+    .about-page {
+      padding-top: 32px;
+      row-gap: 0;
+    }
+
+    .about-title {
+      margin-bottom: 52px;
+    }
+
+    .about-title h1 {
+      font-size: 40px;
+    }
+
     .about-title,
     .about-copy {
       grid-column: auto;
