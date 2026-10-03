@@ -16,6 +16,17 @@ export type PlaygroundItem = {
 // For videos, src is an MP4 and thumbnail is its poster image.
 export const playgroundItems: PlaygroundItem[] = [
   {
+    slug: 'cash-flow-widget',
+    title: 'Cash flow widget',
+    caption:
+      'A compact banking widget for exploring cash flow across accounts, comparing income and expenses, and checking balances and recent transactions.',
+    publishedAt: '2026-10-02',
+    mediaType: 'video',
+    src: '/videos/cash-flow-widget.mp4',
+    thumbnail: '/images/playground/cash-flow-widget.jpg',
+    alt: 'Cash flow widget with animated account filters, income and expense charts, account balances, and expandable recent transactions',
+  },
+  {
     slug: 'italian-riviera-cards',
     title: 'Italian Riviera cards',
     caption:
