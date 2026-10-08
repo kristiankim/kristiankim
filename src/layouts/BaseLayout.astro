@@ -1,4 +1,7 @@
 ---
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
+
 interface Props {
   title?: string;
   description?: string;
@@ -47,6 +50,8 @@ const navItems = [
     <link rel="icon" type="image/png" href="/favicon-light.png" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/png" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <Analytics />
+    <SpeedInsights />
   </head>
   <body>
     <header id="topnav" class="topnav">
