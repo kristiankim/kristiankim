@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import VideoComparison from '../../components/VideoComparison.astro';
 import { thoughts as fallbackThoughts } from '../../data/content';
 import { getPosts, urlFor } from '../../lib/sanity';
 
@@ -34,6 +35,12 @@ type PortableBlock = {
   text?: string;
   items?: Array<{ label?: string; value?: string }>;
   images?: Array<Record<string, any>>;
+  beforeSrc?: string;
+  afterSrc?: string;
+  poster?: string;
+  aspectRatio?: string;
+  code?: string;
+  language?: string;
 };
 
 type BodyRenderItem =
@@ -271,6 +278,14 @@ const remainingBodyItems = buildBodyItems(
 
           const block = item.block;
 
+          if (block._type === 'codeBlock' && block.code) {
+            return <pre class="article-code"><code>{block.code}</code></pre>;
+          }
+
+          if (block._type === 'videoComparison' && block.beforeSrc && block.afterSrc) {
+            return <VideoComparison title={block.title || 'UI comparison'} beforeSrc={block.beforeSrc} afterSrc={block.afterSrc} poster={block.poster} caption={block.caption} aspectRatio={block.aspectRatio} />;
+          }
+
           if (block._type === 'block') {
             const html = renderPortableChildren(block.children, block.markDefs);
             const plainText = toPlainText(block);
@@ -426,6 +441,16 @@ const remainingBodyItems = buildBodyItems(
 </script>
 
 <style>
+  .article-code {
+    margin: 24px 0;
+    padding: 20px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #eeece7;
+    font: 13px/1.7 var(--font-mono);
+  }
+
   .thought-article {
     display: grid;
     gap: 24px;

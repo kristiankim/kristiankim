@@ -1,0 +1,79 @@
+---
+interface Props {
+  title: string;
+  beforeSrc: string;
+  afterSrc: string;
+  poster?: string;
+  caption?: string;
+  aspectRatio?: string;
+}
+const { title, beforeSrc, afterSrc, poster, caption, aspectRatio = '2008 / 1080' } = Astro.props;
+---
+
+<video-comparison>
+  <figure class="comparison" style={`--video-ratio: ${aspectRatio}`}>
+    <div class="comparison-header">
+      <span class="comparison-title">{title}</span>
+      <div class="comparison-toggle" role="group" aria-label={`${title}: compare before and after`} hidden>
+        <button type="button" data-state="before" aria-pressed="false">Before</button>
+        <button type="button" data-state="after" aria-pressed="true">After</button>
+      </div>
+    </div>
+    <div class="comparison-media">
+      <video data-state="before" aria-label={`${title} — before`} controls muted playsinline loop preload="none">
+        <source src={beforeSrc} type="video/mp4" />
+        <a href={beforeSrc}>Watch the before clip</a>
+      </video>
+      <video data-state="after" aria-label={`${title} — after`} controls muted playsinline loop preload="metadata" poster={poster}>
+        <source src={afterSrc} type="video/mp4" />
+        <a href={afterSrc}>Watch the after clip</a>
+      </video>
+    </div>
+    {caption && <figcaption>{caption}</figcaption>}
+  </figure>
+</video-comparison>
+
+<script>
+  class VideoComparison extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      this.dataset.ready = 'true';
+      const videos = Array.from(this.querySelectorAll<HTMLVideoElement>('video'));
+      const buttons = Array.from(this.querySelectorAll<HTMLButtonElement>('button[data-state]'));
+      const toggle = this.querySelector<HTMLElement>('.comparison-toggle');
+      videos.forEach(video => { video.hidden = video.dataset.state !== 'after'; });
+      if (toggle) toggle.hidden = false;
+
+      buttons.forEach(button => button.addEventListener('click', () => {
+        if (button.getAttribute('aria-pressed') === 'true') return;
+        buttons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        videos.forEach(video => {
+          video.pause();
+          const selected = video.dataset.state === button.dataset.state;
+          video.hidden = !selected;
+          if (selected) {
+            video.currentTime = 0;
+            void video.play().catch(() => { /* Native controls remain available. */ });
+          }
+        });
+      }));
+    }
+  }
+  if (!customElements.get('video-comparison')) customElements.define('video-comparison', VideoComparison);
+</script>
+
+<style>
+  video-comparison { display: block; margin: 32px 0; }
+  .comparison { margin: 0; }
+  .comparison-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+  .comparison-title { color: var(--text); font: 500 14px/1.4 var(--font-sans); }
+  .comparison-toggle { display: inline-flex; flex-shrink: 0; padding: 3px; background: #eeece7; border-radius: 9px; }
+  .comparison-toggle[hidden], video[hidden] { display: none; }
+  button { min-height: 40px; padding: 8px 14px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: 500 13px/1.2 var(--font-sans); cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; }
+  button[aria-pressed="true"] { background: var(--page-bg); color: var(--text); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  video { display: block; width: 100%; aspect-ratio: var(--video-ratio); object-fit: contain; background: #f3f1eb; border: 1px solid var(--line); border-radius: 10px; }
+  figcaption { margin-top: 12px; color: var(--muted); font: 14px/1.5 var(--font-sans); }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  @media (max-width: 420px) { .comparison-header { align-items: flex-start; flex-direction: column; gap: 10px; } }
+</style>

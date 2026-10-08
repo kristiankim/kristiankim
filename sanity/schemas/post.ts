@@ -30,6 +30,17 @@ export const post = defineType({
         { type: 'calloutBlock' },
         { type: 'metricsBlock' },
         { type: 'galleryBlock' },
+        { type: 'videoComparison' },
+        {
+          type: 'object',
+          name: 'codeBlock',
+          title: 'Code block',
+          fields: [
+            { name: 'code', title: 'Code', type: 'text', rows: 8, validation: (r) => r.required() },
+            { name: 'language', title: 'Language', type: 'string', initialValue: 'css' },
+          ],
+          preview: { select: { title: 'language' }, prepare: ({ title }) => ({ title: `${title || 'Code'} snippet` }) },
+        },
       ],
     }),
   ],

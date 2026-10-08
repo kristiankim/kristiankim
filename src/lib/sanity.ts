@@ -67,6 +67,6 @@ export async function getPosts(): Promise<SanityPost[]> {
   return sanity.fetch(
     groq`*[_type == "post"] | order(publishedAt desc, _createdAt desc){
       _id,title,slug,category,publishedAt,tags,coverImage{asset,alt},body
-    }`
+    }`, {}, { perspective: 'published' }
   );
 }

@@ -3,6 +3,7 @@ import { playground } from './playground';
 import { post } from './post';
 import { project } from './project';
 import { calloutBlock, galleryBlock, metricsBlock, quoteBlock } from './blocks';
+import { videoComparison } from './videoComparison';
 
 export const schemaTypes = [
   playground,
@@ -13,4 +14,5 @@ export const schemaTypes = [
   calloutBlock,
   metricsBlock,
   galleryBlock,
+  videoComparison,
 ];
