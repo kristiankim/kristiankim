@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CareerTimeline from '../components/CareerChapters.astro';
 import {
-  experiences,
   home,
   projects as fallbackProjects,
   thoughts as fallbackThoughts,
@@ -69,28 +69,9 @@ const works = sanityProjects.length
     </div>
   </section>
 
-  <section class="section-block">
-    <div class="section-header">
-      <div class="section-heading">Experiences</div>
-    </div>
-    <div class="works-list">
-      {experiences.map((item) => (
-        <article class="project-row">
-          <div class="project-meta">
-            <div class="project-company">{item.company}</div>
-            <div class="project-year">
-              <span>{item.period}</span>
-            </div>
-          </div>
-          <div class="project-copy">
-            <p class="project-summary">{item.summary}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  </section>
+  <CareerTimeline works={works} />
 
-  <section id="works" class="section-block">
+  <section id="works" class="section-block" hidden>
     <div class="section-header">
       <a class="section-heading section-heading-link" href="/works"><span>Selected work</span><span class="section-heading-arrow" aria-hidden="true">→</span></a>
     </div>

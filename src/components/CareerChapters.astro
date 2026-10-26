@@ -1,0 +1,139 @@
+---
+interface Work {
+  slug: string;
+  title: string;
+  company: string;
+  year: string;
+  isPrivate: boolean;
+  coverImageUrl?: string | null;
+  coverImageAlt: string;
+}
+interface Props { works?: Work[] }
+const { works = [] } = Astro.props;
+const normalizeCompany = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+const companyKeys = [['weare8'], ['mosaicapp', 'mosaic'], ['hugoandcat', 'hugocat'], ['jpmorgan', 'jpmorganchase']];
+const relatedWorks = companyKeys.map(keys => works.filter(work => keys.includes(normalizeCompany(work.company)))).reverse();
+const websites = [null, null, 'https://mosaicapp.com', 'https://weare8.com'];
+const end = new Date().getFullYear() + 1;
+// Month boundaries keep the plotted tenure aligned with the displayed dates.
+const month = (year: number, monthNumber: number) => year + (monthNumber - 1) / 12;
+const chapters = [
+  { name:'WeAre8', dates:'Sep 2013–Jun 2015', start:month(2013,9), end:month(2015,7), text:'As a founding designer, I helped shape a social-sharing app for mobile and web, establishing its visual language and key usability workflows.', role:'UI/UX Designer', logo:'eight' },
+  { name:'Mosaic', dates:'Sep 2015–Nov 2019', start:month(2015,9), end:month(2019,12), text:'I led end-to-end design for a 0–1, B2B SaaS platform helping people manage projects, teams, and daily operations. Research, prototyping, and a shared design system kept the product grounded in user needs, from early ideas through implementation.', role:'Lead Designer', logo:'mosaic.png' },
+  { name:'Hugo & Cat', dates:'Feb–Sep 2020', start:month(2020,2), end:month(2020,10), text:'I partnered with the creative director and fellow designers to turn client needs into responsive websites, mobile apps, and digital payment experiences. Clients included Amazon, Schneider, Pfizer, and the American College of Surgeons.', role:'User Interface Designer', logo:'hugo-cat.png' },
+  { name:'JPMorgan Chase', dates:'Apr 2021–Present', start:month(2021,4), end, text:'I lead a team of product designers shaping commercial banking for businesses from startups to global enterprises. We design cash management experiences that help companies understand cash flow, optimize working capital, and extend their runway, supported by scalable patterns and a coherent end-to-end experience.', role:'VP, Product Designer', logo:'jpmorgan-chase.png' },
+].reverse();
+const firstYear = Math.floor(Math.min(...chapters.map(chapter => chapter.start)));
+const ticks = Array.from({length:(end-firstYear)*4},(_,i)=>firstYear+i/4).reverse();
+---
+<career-chapters>
+  <div class="eyebrow"><span>A career in chapters</span></div>
+  <div class="navigation-scroll">
+  <div class="navigation-track">
+  <div class="tabs" role="tablist" aria-label="Career chapters">
+    {chapters.map((c,i)=><button role="tab" type="button" aria-label={c.name} id={`chapter-tab-${i}`} aria-controls={`chapter-panel-${i}`} aria-selected={i===0} tabindex={i===0?0:-1} data-start={c.start} data-end={c.end}>
+      <span class:list={['logo',{'eight':c.logo==='eight','chase':c.logo==='jpmorgan-chase.png'}]}>{c.logo==='eight'?<><img src="/images/career/eight-base.svg" alt=""/><img class="mark" src="/images/career/eight-mark.svg" alt=""/></>:<img src={`/images/career/${c.logo}`} alt=""/>}</span>
+      <small aria-hidden="true">0{i+1}</small>
+    </button>)}
+  </div>
+  <div class="scale-scroll"><div class="scale" aria-hidden="true" data-first-year={firstYear}>
+    {ticks.map(year=><span class:list={['tick',{'major':Number.isInteger(year),'lit':year>=chapters[0].start&&year<chapters[0].end}]} data-year={year} style={`left:${(end-.25-year)/(end-firstYear)*100}%`}><i></i>{Number.isInteger(year)&&<span>{year}</span>}</span>)}
+  </div></div>
+  </div>
+  </div>
+  <div class="stories">
+    {chapters.map((c,i)=><section class:list={['story',{'active':i===0}]} role="tabpanel" id={`chapter-panel-${i}`} aria-labelledby={`chapter-tab-${i}`} aria-hidden={i!==0} inert={i!==0}>
+      <div class="meta"><span class="number">0{i+1} / 04</span><span>{c.dates}</span><span>{c.role}</span></div>
+      <div class="copy">
+        <h3>{c.name}</h3>
+        <p>{c.text}</p>
+        {websites[i] && <a class="company-website" href={websites[i]!} target="_blank" rel="noreferrer">Visit {c.name} ↗</a>}
+        {relatedWorks[i].length > 0 && <div class="chapter-work" aria-label={`${c.name} portfolio work`}>
+          {relatedWorks[i].map(work => <a class="work-link" href={`/works/${work.slug}`}>
+            {work.coverImageUrl && <img src={work.coverImageUrl} alt={work.coverImageAlt} loading="lazy" />}
+            <span class="work-info"><span class="work-meta">{work.year}{work.isPrivate && ' · Private'}</span><span class="work-title">{work.title} <span aria-hidden="true">↗</span></span></span>
+          </a>)}
+        </div>}
+      </div>
+    </section>)}
+  </div>
+</career-chapters>
+<style>
+  career-chapters{display:block;margin:64px 0 48px;padding:48px 0 64px;--chapter-ease:cubic-bezier(.23,1,.32,1)}
+  .eyebrow{display:flex;justify-content:space-between;gap:16px;margin-bottom:24px;font:400 12px/1.5 var(--font-mono);color:var(--muted)}
+  .stories{position:relative;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.35);overflow:hidden}
+  .story{position:absolute;top:0;left:0;width:100%;box-sizing:border-box;display:grid;grid-template-columns:1fr 2fr;gap:40px;padding:32px;opacity:0;transform:translateY(8px);visibility:hidden;transition:opacity 420ms ease,transform 560ms var(--chapter-ease),visibility 0s 420ms;pointer-events:none}
+  .story.active{position:relative;opacity:1;transform:translateY(0);visibility:visible;transition-delay:100ms,100ms,0s;pointer-events:auto}
+  .meta{display:flex;flex-direction:column;gap:8px;font:400 12px/1.6 var(--font-mono);color:var(--muted)}
+  .number{margin-bottom:24px;color:var(--text)}
+  .copy h3{margin:0 0 12px;font-family:var(--font-serif);font-size:20px;line-height:1.3;font-weight:400}
+  .copy p{margin:0;color:var(--muted);font-size:16px;line-height:1.6;max-width:54ch}
+  .company-website{display:inline-block;margin-top:12px;color:var(--text);font-size:12px;text-underline-offset:4px}
+  .chapter-work{display:grid;gap:16px;margin-top:24px}
+  .work-link{display:flex;align-items:center;gap:16px;color:var(--text);text-decoration:none;min-width:0}
+  .work-link img{width:120px;aspect-ratio:550/344;object-fit:contain;border-radius:6px;background:rgba(0,0,0,.025);flex:none}
+  .work-info{display:grid;gap:6px;min-width:0}
+  .work-meta{font:400 11px/1.5 var(--font-mono);color:var(--muted)}
+  .work-title{font-size:14px;line-height:1.4}
+  .work-link:hover .work-title{text-decoration:underline;text-underline-offset:4px}
+  .work-link:focus-visible{outline:2px solid var(--text);outline-offset:5px;border-radius:4px}
+  .navigation-scroll{overflow-x:auto;scrollbar-width:none;padding:6px 4px}
+  .navigation-scroll::-webkit-scrollbar{display:none}
+  .navigation-track{min-width:652px}
+  .scale{position:relative;height:110px;margin:0 12px;cursor:crosshair}
+  .tick{position:absolute;top:58px;font:400 11px/1 var(--font-mono);color:var(--muted)}
+  .tick i{display:block;width:1px;height:10px;background:#8e8c87;transform-origin:bottom;opacity:.55;transition:transform 600ms var(--chapter-ease),opacity 400ms ease}
+  .tick.major i{height:18px;margin-top:-8px;opacity:.8}
+  .tick.lit i{transform:scaleY(2.2);opacity:1;background:var(--text)}
+  .tick>span{display:block;margin-top:12px}
+  .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+  .tabs button{position:relative;display:flex;flex-direction:column;gap:12px;align-items:flex-start;min-height:104px;padding:20px 0 12px;border:0;border-top:1px solid var(--line);background:none;color:var(--text);text-align:left;cursor:pointer;opacity:.4;transition:opacity 400ms ease;font-size:12px}
+  .tabs button[aria-selected=true]{opacity:1;border-top-color:var(--text)}
+  .tabs button:focus-visible{outline:2px solid var(--text);outline-offset:5px;border-radius:2px}
+  .logo{display:flex;align-items:center;height:32px;position:relative}
+  .logo img{max-width:100px;max-height:32px;width:auto}
+  .logo.eight{width:32px}.eight img{position:absolute;width:32px}.eight .mark{width:auto;left:11px;top:7px}
+  .logo.chase{width:109px;height:32px;overflow:hidden}.chase img{position:absolute;max-width:none;max-height:none;width:109px;height:60.72px;top:-14px}
+  .tabs small{position:absolute;right:0;top:24px;font:400 10px/1 var(--font-mono);color:var(--muted)}
+  .keyboard .story,.keyboard .tick i{transition:none}
+  @media(max-width:700px){
+    .tabs button{min-height:76px}
+    .navigation-scroll{--fade-left:0px;--fade-right:24px;mask-image:linear-gradient(to right,transparent,#000 var(--fade-left),#000 calc(100% - var(--fade-right)),transparent)}
+    .navigation-scroll.can-scroll-left{--fade-left:24px}
+    .navigation-scroll:not(.can-scroll-right){--fade-right:0px}
+  }
+  @media(max-width:600px){career-chapters{margin-top:40px;padding:32px 0 40px}.story{grid-template-columns:1fr;gap:20px;padding:24px}.meta{gap:4px}.number{margin-bottom:4px}.work-link img{width:88px}}
+  @media(prefers-reduced-motion:reduce){.story{transform:none;transition:opacity 150ms ease,visibility 0s}.story.active{transition-delay:0s}.tick i{transition:opacity 150ms ease}}
+</style>
+<script>
+  class CareerChapters extends HTMLElement {
+    private cleanup?:()=>void;
+    connectedCallback(){
+      const tabs=Array.from(this.querySelectorAll<HTMLButtonElement>('[role=tab]'));
+      const stories=Array.from(this.querySelectorAll<HTMLElement>('.story'));
+      const ticks=Array.from(this.querySelectorAll<HTMLElement>('.tick'));
+      const scale=this.querySelector<HTMLElement>('.scale')!;
+      const controller=new AbortController();const options={signal:controller.signal};
+      const scrollers=Array.from(this.querySelectorAll<HTMLElement>('.navigation-scroll'));
+      const updateEdges=()=>scrollers.forEach(el=>{el.classList.toggle('can-scroll-left',el.scrollLeft>2);el.classList.toggle('can-scroll-right',el.scrollLeft+el.clientWidth<el.scrollWidth-2)});
+      scrollers.forEach(el=>el.addEventListener('scroll',updateEdges,{...options,passive:true}));
+      const resizeObserver=new ResizeObserver(updateEdges);scrollers.forEach(el=>resizeObserver.observe(el));updateEdges();
+      let active=0,pending=-1;let timer:ReturnType<typeof setTimeout>|undefined;
+      const cancel=()=>{clearTimeout(timer);pending=-1};
+      const select=(index:number)=>{cancel();if(index===active)return;active=index;
+        tabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;stories[i].classList.toggle('active',i===index);stories[i].setAttribute('aria-hidden',String(i!==index));stories[i].inert=i!==index});
+        ticks.forEach(t=>t.classList.toggle('lit',Number(t.dataset.year)>=Number(tabs[index].dataset.start)&&Number(t.dataset.year)<Number(tabs[index].dataset.end)));
+      };
+      const preview=(index:number)=>{this.classList.remove('keyboard');if(index===active){cancel();return}if(pending===index)return;cancel();pending=index;timer=setTimeout(()=>select(index),180)};
+      tabs.forEach((tab,index)=>{
+        tab.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&matchMedia('(hover:hover)').matches)preview(index)},options);
+        tab.addEventListener('pointerleave',cancel,options);tab.addEventListener('click',()=>select(index),options);
+        tab.addEventListener('keydown',e=>{let next=index;if(e.key==='ArrowRight')next=(index+1)%tabs.length;else if(e.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(e.key==='Home')next=0;else if(e.key==='End')next=tabs.length-1;else return;e.preventDefault();this.classList.add('keyboard');select(next);tabs[next].focus()},options);
+      });
+      scale.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||!matchMedia('(hover:hover)').matches)return;const r=scale.getBoundingClientRect();const first=Number(scale.dataset.firstYear),last=Number(tabs[0].dataset.end);const year=Math.max(first,last-.25-Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(last-first));let index=tabs.findIndex(t=>year>=Number(t.dataset.start)&&year<Number(t.dataset.end));if(index<0)index=active;preview(index)},options);
+      scale.addEventListener('pointerleave',cancel,options);this.cleanup=()=>{cancel();controller.abort();resizeObserver.disconnect()};
+    }
+    disconnectedCallback(){this.cleanup?.()}
+  }
+  if(!customElements.get('career-chapters'))customElements.define('career-chapters',CareerChapters);
+</script>
